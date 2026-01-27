@@ -16,15 +16,16 @@ import {
 
 import { getCreateAccountInstruction } from "@solana-program/system";
 
-// @solana-program/tokenで新たにトークンアカウント用のパッケージをインポートします。
 import {
-  // getInitializeAccount2Instructionはトークンアカウントを初期化する命令を生成する関数です。
+  // getCreateAssociatedTokenInstructionAsyncはAssociated Token Accountを作成する命令を生成する非同期関数です。
+  getCreateAssociatedTokenInstructionAsync,
   getInitializeAccount2Instruction,
   getInitializeMintInstruction,
   getMintSize,
-  // getTokenSizeはトークンアカウント生成時に必要なバイト数を返す関数です。
   getTokenSize,
   TOKEN_PROGRAM_ADDRESS,
+  // findAssociatedTokenPdaはミントアドレスとウォレットアドレス、今回はトークン発行者権限を持つアドレスからAssociated Token Accountのアドレスを導出する関数です。
+  findAssociatedTokenPda,
 } from "@solana-program/token";
 
 const rpc = createSolanaRpc("http://localhost:8899");
@@ -89,19 +90,14 @@ const transactionSignature = getSignatureFromTransaction(signedTransaction);
 console.log("Mint Address:", mint.address);
 console.log("\nTransaction Signature:", transactionSignature);
 
-// ここからトークンアカウントを作成するコードを追加します。
-// まずはトークンアカウントのアドレスとして使用するキーペアを生成します。
 const tokenAccount = await generateKeyPairSigner();
 
-// ミントアカウントの時と同様にトークンアカウント作成に必要なサイズを取得します。
 const tokenAccountSpace = BigInt(getTokenSize());
 
-// 必要なサイズを元にレントフィー免除に必要な最小額を取得します。
 const tokenAccountRent = await rpc
   .getMinimumBalanceForRentExemption(tokenAccountSpace)
   .send();
 
-// 次にトークンアカウントを新しく作成する命令を作ります。項目はミントアカウントの時と同じですね。
 const createTokenAccountInstruction = getCreateAccountInstruction({
   payer: feePayer,
   newAccount: tokenAccount,
@@ -110,38 +106,27 @@ const createTokenAccountInstruction = getCreateAccountInstruction({
   programAddress: TOKEN_PROGRAM_ADDRESS,
 });
 
-// トークンアカウントのデータを初期化する命令を作ります。
 const initializeTokenAccountInstruction = getInitializeAccount2Instruction({
-  // 先ほどトークンアカウント用に作成したキーペアのアドレスを指定します。
   account: tokenAccount.address,
-  // ここではどのトークンミントアカウントに紐づけるかを指定します。ミントアカウントのアドレスを指定しましょう。
   mint: mint.address,
-  // ownerはこのトークンアカウントを管理するアドレスです。ミントアカウントで発行権限を持つアドレスと同じ手数料支払い者のアドレスを指定します。
   owner: feePayer.address,
 });
 
-// トークンアカウントの作成と初期化の命令を配列にまとめます。
-const instructions2 = [
+const tokenAccountInstructions = [
   createTokenAccountInstruction,
   initializeTokenAccountInstruction,
 ];
 
-// トークンアカウント作成用のトランザクションメッセージを作成します。
 const tokenAccountMessage = pipe(
-  // createTransactionMessage関数でトランザクションメッセージを作成していきます。
   createTransactionMessage({ version: 0 }),
-  // ミントアカウントを作った時と同じようにアカウント作成時の手数料を支払うアドレスとトランザクションのブロックハッシュ、最後にトークンアカウント作成の命令を設定します。
   (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
   (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-  (tx) => appendTransactionMessageInstructions(instructions2, tx),
+  (tx) => appendTransactionMessageInstructions(tokenAccountInstructions, tx),
 );
 
-// ミントアカウント作成時と同じように署名付きのトランザクションメッセージを作成します。
 const signedTokenAccountTx =
   await signTransactionMessageWithSigners(tokenAccountMessage);
 
-// そのままではブロックハッシュベースのトランザクションとして認識されないため、
-// lifetimeConstraintプロパティを追加してブロックハッシュベースのトランザクションとして扱います。
 const signedTokenAccountTxWithBlockhashLifetime =
   signedTokenAccountTx as typeof signedTokenAccountTx & {
     lifetimeConstraint: {
@@ -149,15 +134,74 @@ const signedTokenAccountTxWithBlockhashLifetime =
     };
   };
 
-// トランザクションを送信し、confirmedステータスになるのを待ちます。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
   signedTokenAccountTxWithBlockhashLifetime,
   { commitment: "confirmed" },
 );
 
-// トランザクション署名を取得します。
-const transactionSignature2 = getSignatureFromTransaction(signedTokenAccountTx);
+const tokenAccountTransactionSignature =
+  getSignatureFromTransaction(signedTokenAccountTx);
 
-// 最後に作成したトークンアカウントアドレスとトランザクション署名をコンソールに表示します。
 console.log("\nToken Account Address:", tokenAccount.address);
-console.log("\nTransaction Signature:", transactionSignature2);
+console.log("\nTransaction Signature:", tokenAccountTransactionSignature);
+
+// まずfindAssociatedTokenPdaを使用してAssociated Token Accountアドレスを導出してみましょう。
+// 今回は最初に作成したミントアドレスとトークン発行者権限を持つfeePayerのアドレスを使用して導出してみます。
+const [associatedTokenAddress] = await findAssociatedTokenPda({
+  mint: mint.address,
+  owner: feePayer.address,
+  tokenProgram: TOKEN_PROGRAM_ADDRESS,
+});
+
+// 実際に動作させてみましょう。このように簡単に導出することができます。
+console.log(
+  "\nAssociated Token Account Address:",
+  associatedTokenAddress.toString(),
+);
+
+// ここからは実際にAssociated Token Accountを作成してみます。
+// 2つ目のトランザクション用に新しいブロックハッシュを取得します。
+const { value: latestBlockhash2 } = await rpc.getLatestBlockhash().send();
+
+// Associated Token Accountを作成する命令を生成します。getCreateAssociatedTokenInstructionAsyncは非同期関数なのでawaitで呼び出します。
+// トークン発行者権限を持つfeePayerのアドレスと最初に作成したMintアカウントからAssociated Token Accountを作成します。
+// 手数料支払い者は今回はこのアドレスのオーナーとします。
+const createAtaInstruction = await getCreateAssociatedTokenInstructionAsync({
+  payer: feePayer,
+  mint: mint.address,
+  owner: feePayer.address,
+});
+
+// トランザクションメッセージを作成します。
+// 手数料支払い者とブロックハッシュを設定するところは同じです。
+// 今回はAssociated Token Accountを作成する命令ををトランザクションメッセージに含めます。
+const ataTransactionMessage = pipe(
+  createTransactionMessage({ version: 0 }),
+  (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash2, tx),
+  (tx) => appendTransactionMessageInstructions([createAtaInstruction], tx),
+);
+
+// トランザクションメッセージに署名します。
+const ataSignedTransaction = await signTransactionMessageWithSigners(
+  ataTransactionMessage,
+);
+
+// ブロックハッシュの有効期限情報を付与します。
+const signedAssociatedTokenAccountTxWithBlockhashLifetime =
+  ataSignedTransaction as typeof ataSignedTransaction & {
+    lifetimeConstraint: {
+      lastValidBlockHeight: bigint;
+    };
+  };
+
+// トランザクションを送信し、confirmedステータスになるまで待ちます。
+await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
+  signedAssociatedTokenAccountTxWithBlockhashLifetime,
+  { commitment: "confirmed" },
+);
+
+// トランザクション署名を取得します。
+const ataTransactionSignature =
+  getSignatureFromTransaction(ataSignedTransaction);
+console.log("\nTransaction Signature:", ataTransactionSignature);

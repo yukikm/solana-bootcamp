@@ -1,55 +1,37 @@
 # 導入
 
-次にトークンアカウントを作成していきましょう。
-トークンアカウントでは特定のトークンの残高を保持するアカウントです。トークンの総残高などを管理します。
-各トークンアカウントは一つのミントアカウントに関連づけられていて、トークンの残高などを確認できます。
+次にアソシエイテッドトークンアカウントを作成していきましょう。
+アソシエイテッドトークンアカウントは各ユーザのウォレットが特定のトークンを保持するためのトークンアカウントです。
+決定論的アドレス、PDAを利用します。
 
 # 作業
 
-1. 先ほどのトークンミントアカウントのコードに追記する形でトークンアカウントを作成して、ミントアカウントに関連づけていきましょう。
+1. \*./new-token.tsのコメントを読んでいく。
 
-2. \*./new-token.tsのコメントを読んでいく。
-
-3. 動作確認してみましょう。local validatorを起動します。
+2. 動作確認してみましょう。local validatorを起動します。
 
 ```
 surfpool start
 ```
 
-4. プログラムを実行してみましょう。
+3. プログラムを実行してみましょう。
 
 ```
 npx tsx new-token.ts
 ```
 
-5. 無事新しくトークンアカウントとそのトランザクションシグネチャが表示されましたね。
+4. 無事にAssociated Token Account のトランザクションシグネチャが表示されましたね。
 
 ```
-Mint Address: 3PrepAod4JZWz9hbe7P7EbAFL4LDy1CYbuYnMgTHdUwM
+Mint Address: 9pRbYUTWvmf4UjWAhrhXnRHMAMMrWV6UUcaUFz5aaoSE
 
-Transaction Signature: ZJTQ7sUb62simF4pLVDDKUFCpj6BZ7aZwpDrf3dL9UN15vf8PsM3jUC4CtS6rGUVnnPAx9f3f87JdwxtfBdNZHR
+Transaction Signature: 3gZN8swE62dz7WCPNnaNqufgE3AUkwMRJdcU8raiBuxTaQVMgmUQEoSf8NQcLZHdsKyS7Xpg6mVAShkcTLmui8YU
 
-Token Account Address: FyAaVbET11erv2WiHQUckHizGEALgd7nP9bUTD3ArFxe
+Token Account Address: DH4LKHomt2rpJYiwjE8bawqcLchtyoJuVWu1B7X8VFoD
 
-Transaction Signature: 2GTQrETd1khvVE82H44kGdBrq811BhEchfSMcEFU5F6wA9ppA2YHxfhqcSaLVvbXfydFZKeD99kjAK5e21FsZLE5
-```
+Transaction Signature: 2PMG5ccZGBih6EeLDgYYNhmxNBq7w3F9ZdYgt9NTuu6DAg2pN8sWXbefoHC7VEpyVvF54RmDzT4B1aLpdEAqNiEf
 
-3. local validatorを起動します。
+Associated Token Account Address: FpoGQHT9S5h2uWcVs5jC8XrhfZwM3Mw7iFg2YaCNvaBh
 
-```
-surfpool start
-```
-
-10. プログラムを実行してみましょう。
-
-```
-npx tsx create-token-mint.ts
-```
-
-11. 無事Mint Addressとトランザクションシグネチャが表示されましたね。
-
-```
-Mint Address: 3VD21KzNmU3vkikLNFTaKu8XyMKZTR924yygSkJp6baV
-
-Transaction Signature: 1ZEHVK89mGNBquaQf47iyaGgAhhzUNUfhNfQ2A5Y9LQmsVdg7T7SJrCxFZgC3RkDxCHoBVFwDfEWUsJPs51rMxa
+Transaction Signature: 2a7j6kfmSBpqPUvGtP2AMtDTHXTFdZLjHnWgSArf7nJ6kpbBM6pQkvPQjgDFYG27SLT6FELoVLc4gndVuRYQZxa3
 ```

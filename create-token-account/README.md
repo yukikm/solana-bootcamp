@@ -33,23 +33,3 @@ Token Account Address: FyAaVbET11erv2WiHQUckHizGEALgd7nP9bUTD3ArFxe
 
 Transaction Signature: 2GTQrETd1khvVE82H44kGdBrq811BhEchfSMcEFU5F6wA9ppA2YHxfhqcSaLVvbXfydFZKeD99kjAK5e21FsZLE5
 ```
-
-3. local validatorを起動します。
-
-```
-surfpool start
-```
-
-10. プログラムを実行してみましょう。
-
-```
-npx tsx create-token-mint.ts
-```
-
-11. 無事Mint Addressとトランザクションシグネチャが表示されましたね。
-
-```
-Mint Address: 3VD21KzNmU3vkikLNFTaKu8XyMKZTR924yygSkJp6baV
-
-Transaction Signature: 1ZEHVK89mGNBquaQf47iyaGgAhhzUNUfhNfQ2A5Y9LQmsVdg7T7SJrCxFZgC3RkDxCHoBVFwDfEWUsJPs51rMxa
-```
