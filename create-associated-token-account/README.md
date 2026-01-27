@@ -6,7 +6,7 @@
 
 # 作業
 
-1. \*./new-token.tsのコメントを読んでいく。
+1. [./new-token.ts](./new-token.ts)のコメントを読んでいく。
 
 2. 動作確認してみましょう。local validatorを起動します。
 
