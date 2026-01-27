@@ -21,18 +21,21 @@ surfpool start
 npx tsx new-token.ts
 ```
 
-4. 無事にAssociated Token Account のトランザクションシグネチャが表示されましたね。
+4. 無事にトークンが発行できましたね。
 
 ```
-Mint Address: 9pRbYUTWvmf4UjWAhrhXnRHMAMMrWV6UUcaUFz5aaoSE
+Mint Address: GpeQDAkgTjQvqLmuV6n6ZTRiMR78Aioq3TwPQgxdHDj
 
-Transaction Signature: 3gZN8swE62dz7WCPNnaNqufgE3AUkwMRJdcU8raiBuxTaQVMgmUQEoSf8NQcLZHdsKyS7Xpg6mVAShkcTLmui8YU
+Transaction Signature: 43nCBydhfpTUaKFoXXQwCNBh4Be3wDRQkD5YgrTvi1Tw7rcqBYxMAiW9WX1UTpJXRAhSLqFABe8MRXt5kAMPhCaT
 
-Token Account Address: DH4LKHomt2rpJYiwjE8bawqcLchtyoJuVWu1B7X8VFoD
+Token Account Address: 3zf2uXB3uuGsitubwoekEVBJqAUgYde26Rx3cRVC5ttS
 
-Transaction Signature: 2PMG5ccZGBih6EeLDgYYNhmxNBq7w3F9ZdYgt9NTuu6DAg2pN8sWXbefoHC7VEpyVvF54RmDzT4B1aLpdEAqNiEf
+Transaction Signature: 3kUGzwybGcXEeAdqfy6431F3GqF5dh8CerDkiZQqSuZP5svnWTvgmXGpa277DML8q9tTmCfqqPiMPsKGZNjV76md
 
-Associated Token Account Address: FpoGQHT9S5h2uWcVs5jC8XrhfZwM3Mw7iFg2YaCNvaBh
+Associated Token Account Address: 6HZArbemfyfMftK6Wqg6u3zZzTfvtiUoNhD6tPXnkA4x
 
-Transaction Signature: 2a7j6kfmSBpqPUvGtP2AMtDTHXTFdZLjHnWgSArf7nJ6kpbBM6pQkvPQjgDFYG27SLT6FELoVLc4gndVuRYQZxa3
+Transaction Signature: 63h7hEML3JaTzMKaEDjJQ7yQDS1ntJgVsnywVdSnhDzwKKKiY6jrPpBhupveugvYCWVhiHxkaZfhezobwusmPLq5
+Successfully minted 1.0 tokens
+
+Transaction Signature: 5Wh6XKk2kFqzipNr4TiNzCM3oP2RVakbiZC1BPkAKYtB5r1Faj3jDDfqhvNRR814aQjc84bVmwKnGqnx6cjkJdvc
 ```

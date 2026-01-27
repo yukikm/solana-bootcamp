@@ -24,6 +24,8 @@ import {
   getTokenSize,
   TOKEN_PROGRAM_ADDRESS,
   findAssociatedTokenPda,
+  // getMintToInstructionはトークンを発行してトークンアカウントに送る命令を生成する関数です。
+  getMintToInstruction,
 } from "@solana-program/token";
 
 const rpc = createSolanaRpc("http://localhost:8899");
@@ -188,3 +190,50 @@ await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
 const ataTransactionSignature =
   getSignatureFromTransaction(ataSignedTransaction);
 console.log("\nTransaction Signature:", ataTransactionSignature);
+
+// 先ほど作成したAssociated Token Accountに対してトークンを発行してみましょう。
+// まずはトークン発行用の命令を生成します。
+const mintToInstruction = getMintToInstruction({
+  // 対象のトークンミントアカウントのアドレス
+  mint: mint.address,
+  // トークンを受け取る先のアカウントアドレス
+  token: associatedTokenAddress,
+  // トークン発行権限を持つアドレス
+  mintAuthority: feePayer.address,
+  // 発行するトークンの量を設定します。今回は1.00トークンを発行します。
+  // トークンミントアカウントを作成するときにdecimalsを9に設定したので、1トークンは1,000,000,000(10億)の最小単位に相当します。
+  amount: 1_000_000_000n,
+});
+
+// トークン発行用のトランザクションメッセージを作成します。
+// 手数料支払い者とブロックハッシュを設定するところは同じで、今回命令には先ほど生成したトークン発行用の命令を含めます。
+const mintTxMessage = pipe(
+  createTransactionMessage({ version: 0 }),
+  (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+  (tx) => appendTransactionMessageInstructions([mintToInstruction], tx),
+);
+
+// トランザクションメッセージに署名します。
+const signedMintTx = await signTransactionMessageWithSigners(mintTxMessage);
+
+// ブロックハッシュの有効期限情報を付与します。
+const signedMintTxWithBlockhashLifetime =
+  signedMintTx as typeof signedMintTx & {
+    lifetimeConstraint: {
+      lastValidBlockHeight: bigint;
+    };
+  };
+
+// トランザクションを送信し、confirmedステータスになるまで待ちます。
+await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
+  signedMintTxWithBlockhashLifetime,
+  { commitment: "confirmed" },
+);
+
+// トランザクション署名を取得します。
+const mintTransactionSignature = getSignatureFromTransaction(signedMintTx);
+
+// トークン発行が成功したことを確認するログを表示します。
+console.log("\nSuccessfully minted 1.0 tokens");
+console.log("\nTransaction Signature:", mintTransactionSignature);
