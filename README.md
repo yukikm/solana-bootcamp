@@ -26,8 +26,6 @@ Mint Authorityは任意のアドレスを設定して新たなSPLトークンを
 
 # トークンミント作成
 
-5.
+./create-token-mint/README.mdに台本作成。
 
-```
-npm i -D tsx
-```
+# 次にトークン

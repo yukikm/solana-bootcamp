@@ -29,3 +29,43 @@ touch create-token-mint.ts
 ```
 
 5. では実際に実装していきましょう。
+
+6. \*./create-token-mint.tsのコメントを読んでいく。
+
+7. 動作確認をしていきます。typescriptのまま動作確認しようと思うので、今回はtsxといったパッケージをインストールします。
+
+```
+npm i -D tsx
+```
+
+8. package.jsonを確認します。今回awaitをトップレベルで使っているので、typeがcommonjsのままでは動作しないため、moduleに書き換えます。
+
+```
+...
+"type": "commonjs",
+...
+```
+
+```
+"type": "module",
+```
+
+9. local validatorを起動します。
+
+```
+surfpool start
+```
+
+10. プログラムを実行してみましょう。
+
+```
+npx tsx create-token-mint.ts
+```
+
+11. 無事Mint Addressとトランザクションシグネチャが表示されましたね。
+
+```
+Mint Address: 3VD21KzNmU3vkikLNFTaKu8XyMKZTR924yygSkJp6baV
+
+Transaction Signature: 1ZEHVK89mGNBquaQf47iyaGgAhhzUNUfhNfQ2A5Y9LQmsVdg7T7SJrCxFZgC3RkDxCHoBVFwDfEWUsJPs51rMxa
+```
