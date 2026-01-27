@@ -28,4 +28,6 @@ Mint Authorityは任意のアドレスを設定して新たなSPLトークンを
 
 ./create-token-mint/README.mdに台本作成。
 
-# 次にトークン
+# トークンアカウント作成
+
+./create-token-account/README.mdに台本作成。
