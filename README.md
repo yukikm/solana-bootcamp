@@ -26,20 +26,20 @@ Mint Authorityは任意のアドレスを設定して新たなSPLトークンを
 
 # トークンミント作成
 
-./create-token-mint/README.mdに台本作成。
+[./create-token-mint/README.md](./create-token-mint/README.md)に台本作成。
 
 # トークンアカウント作成
 
-./create-token-account/README.mdに台本作成。
+[./create-token-account/README.md](./create-token-account/README.md)に台本作成。
 
 # Associated Token Account作成
 
-./create-associated-token-account/README.mdに台本作成。
+[./create-associated-token-account/README.md](./create-associated-token-account/README.md)に台本作成。
 
 # トークンをAssociated Token Accountにミント
 
-./token-mint/README.mdに台本作成。
+[./token-mint/README.md](./token-mint/README.md)に台本作成。
 
 # トークン転送
 
-./token-transfer/README.mdに台本作成。
+[./token-transfer/README.md](./token-transfer/README.md)に台本作成。
