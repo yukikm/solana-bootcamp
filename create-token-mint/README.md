@@ -25,12 +25,12 @@ npm i @solana/kit @solana-program/system @solana-program/token
 4. 実装するファイルを作成します。
 
 ```
-touch create-token-mint.ts
+touch new-token.ts
 ```
 
 5. では実際に実装していきましょう。
 
-6. \*./create-token-mint.tsのコメントを読んでいく。
+6. \*./new-token.tsのコメントを読んでいく。
 
 7. 動作確認をしていきます。typescriptのまま動作確認しようと思うので、今回はtsxといったパッケージをインストールします。
 
@@ -59,7 +59,7 @@ surfpool start
 10. プログラムを実行してみましょう。
 
 ```
-npx tsx create-token-mint.ts
+npx tsx new-token.ts
 ```
 
 11. 無事Mint Addressとトランザクションシグネチャが表示されましたね。
