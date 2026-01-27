@@ -114,9 +114,18 @@ const transactionMessage = pipe(
 const signedTransaction =
   await signTransactionMessageWithSigners(transactionMessage);
 
+// そのままではブロックハッシュベースのトランザクションとして認識されないため、
+// lifetimeConstraintプロパティを追加してブロックハッシュベースのトランザクションとして扱います。
+const signedTransactionWithBlockhashLifetime =
+  signedTransaction as typeof signedTransaction & {
+    lifetimeConstraint: {
+      lastValidBlockHeight: bigint;
+    };
+  };
+
 // トランザクションを送信し、確認を待ちます。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedTransaction,
+  signedTransactionWithBlockhashLifetime,
   { commitment: "confirmed" },
 );
 
