@@ -24,8 +24,11 @@ import {
   getTokenSize,
   TOKEN_PROGRAM_ADDRESS,
   findAssociatedTokenPda,
-  // getMintToInstructionはトークンを発行してトークンアカウントに送る命令を生成する関数です。
   getMintToInstruction,
+  // getTransferInstructionはトークンを別のアカウントに送金する命令を生成する関数です。
+  getTransferInstruction,
+  // fetchTokenはトークンアカウントの情報を取得する関数です。実際に送金されたか確認するために使用します。
+  fetchToken,
 } from "@solana-program/token";
 
 const rpc = createSolanaRpc("http://localhost:8899");
@@ -191,22 +194,13 @@ const ataTransactionSignature =
   getSignatureFromTransaction(ataSignedTransaction);
 console.log("\nTransaction Signature:", ataTransactionSignature);
 
-// 先ほど作成したAssociated Token Accountに対してトークンを発行してみましょう。
-// まずはトークン発行用の命令を生成します。
 const mintToInstruction = getMintToInstruction({
-  // 対象のトークンミントアカウントのアドレス
   mint: mint.address,
-  // トークンを受け取る先のアカウントアドレス
   token: associatedTokenAddress,
-  // トークン発行権限を持つアドレス
   mintAuthority: feePayer.address,
-  // 発行するトークンの量を設定します。今回は1.00トークンを発行します。
-  // トークンミントアカウントを作成するときにdecimalsを9に設定したので、1トークンは1,000,000,000(10億)の最小単位に相当します。
   amount: 1_000_000_000n,
 });
 
-// トークン発行用のトランザクションメッセージを作成します。
-// 手数料支払い者とブロックハッシュを設定するところは同じで、今回命令には先ほど生成したトークン発行用の命令を含めます。
 const mintTxMessage = pipe(
   createTransactionMessage({ version: 0 }),
   (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
@@ -214,10 +208,8 @@ const mintTxMessage = pipe(
   (tx) => appendTransactionMessageInstructions([mintToInstruction], tx),
 );
 
-// トランザクションメッセージに署名します。
 const signedMintTx = await signTransactionMessageWithSigners(mintTxMessage);
 
-// ブロックハッシュの有効期限情報を付与します。
 const signedMintTxWithBlockhashLifetime =
   signedMintTx as typeof signedMintTx & {
     lifetimeConstraint: {
@@ -225,15 +217,156 @@ const signedMintTxWithBlockhashLifetime =
     };
   };
 
-// トランザクションを送信し、confirmedステータスになるまで待ちます。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
   signedMintTxWithBlockhashLifetime,
   { commitment: "confirmed" },
 );
 
-// トランザクション署名を取得します。
 const mintTransactionSignature = getSignatureFromTransaction(signedMintTx);
 
-// トークン発行が成功したことを確認するログを表示します。
 console.log("\nSuccessfully minted 1.0 tokens");
 console.log("\nTransaction Signature:", mintTransactionSignature);
+
+// トークン転送を確認するためにトークンを受け取るための新しいアカウントを作成していきます。
+const recipient = await generateKeyPairSigner();
+
+// 受け取り手のAssociated Token Accountを導出します。
+const [recipientAssociatedTokenAddress] = await findAssociatedTokenPda({
+  // トークンミントアドレス、受け取りてのウォレットアドレス、トークンプログラムアドレスを指定してPDAを導出します。
+  mint: mint.address,
+  owner: recipient.address,
+  tokenProgram: TOKEN_PROGRAM_ADDRESS,
+});
+
+console.log(
+  "\nRecipient Associated Token Account Address:",
+  recipientAssociatedTokenAddress.toString(),
+);
+
+// 受け取り手のAssociated Token Accountを作成する命令を生成します。
+const createRecipientAtaInstruction =
+  await getCreateAssociatedTokenInstructionAsync({
+    payer: feePayer,
+    mint: mint.address,
+    owner: recipient.address,
+  });
+
+// 受け取りてのAssociated Token Accountを作成するトランザクションメッセージを構築します。
+// 以前実施したAssociated Token Accountの作成と同様の手順です。
+const { value: latestBlockhash3 } = await rpc.getLatestBlockhash().send();
+
+const recipientAtaTransactionMessage = pipe(
+  createTransactionMessage({ version: 0 }),
+  (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash3, tx),
+  (tx) =>
+    appendTransactionMessageInstructions([createRecipientAtaInstruction], tx),
+);
+
+// トランザクションメッセージに署名します。
+const recipientAtaSignedTransaction = await signTransactionMessageWithSigners(
+  recipientAtaTransactionMessage,
+);
+
+const signedRecipientAssociatedTokenAccountTxWithBlockhashLifetime =
+  recipientAtaSignedTransaction as typeof recipientAtaSignedTransaction & {
+    lifetimeConstraint: {
+      lastValidBlockHeight: bigint;
+    };
+  };
+
+// 受け取り手のAssociated Token Accountを作成するトランザクションを送信し、confirmedステータスになるまで待機します。
+await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
+  signedRecipientAssociatedTokenAccountTxWithBlockhashLifetime,
+  { commitment: "confirmed" },
+);
+
+// ログにトランザクションシグネチャを出力します。
+const recipientAtaTransactionSignature = getSignatureFromTransaction(
+  recipientAtaSignedTransaction,
+);
+console.log("\nTransaction Signature:", recipientAtaTransactionSignature);
+
+// npx tsx new-token.tsも実行して動作確認しましょう。
+// 受け取り手のAssociated Token Accountも作成できてますね。
+
+// それでは、いよいよトークンの送金を行います。
+// 送金トランザクション用の新しいブロックハッシュを取得します。
+const { value: transferBlockhash } = await rpc.getLatestBlockhash().send();
+
+// getTransferInstruction関数を使ってトークン送金用の命令を生成します。
+const transferInstruction = getTransferInstruction({
+  // sourceには送金元のAssociated Token Accountアドレスを指定します。
+  source: associatedTokenAddress,
+  // destinationには送金先のAssociated Token Accountアドレスを指定します。
+  destination: recipientAssociatedTokenAddress,
+  // authorityには送金元アカウントのオーナーアドレスを指定します。
+  authority: feePayer.address,
+  // 先ほど1.0トークンを発行したので、半分の0.5トークンを送金します。
+  amount: 500_000_000n,
+});
+
+// トークン送金用のトランザクションメッセージを作成します。
+// feePayer、ブロックハッシュの設定はこれまで同様で、今回は直前で作ったtransferInstruction命令を追加します。
+const transferTxMessage = pipe(
+  createTransactionMessage({ version: 0 }),
+  (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(transferBlockhash, tx),
+  (tx) => appendTransactionMessageInstructions([transferInstruction], tx),
+);
+
+// 送金トランザクションメッセージに署名します。
+const signedTransferTx =
+  await signTransactionMessageWithSigners(transferTxMessage);
+
+const signedTransferTxWithBlockhashLifetime =
+  signedTransferTx as typeof signedTransferTx & {
+    lifetimeConstraint: {
+      lastValidBlockHeight: bigint;
+    };
+  };
+
+// 実際に送金トランザクションを送信し、confirmedステータスになるまで待機します。
+await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
+  signedTransferTxWithBlockhashLifetime,
+  { commitment: "confirmed" },
+);
+
+// トランザクション署名を取得します。
+const transferTransactionSignature =
+  getSignatureFromTransaction(signedTransferTx);
+
+// 送金が成功したことをログに出力します。
+console.log("\nTransaction Signature:", transferTransactionSignature);
+console.log("\nSuccessfully transferred 0.5 tokens");
+
+// トークン送金が正しく行われたか確認するために、送金元と送金先のAssociated Token Accountの残高を取得します。
+// fetchToken関数を使ってAssociated Token Accountの情報を取得します。
+// 第一引数にはRPCクライアント、第二引数にトークンアカウントアドレスを指定します。
+// 送金された後の状態を見たいので、confirmedステータスのデータを取得します。
+const senderTokenAccount = await fetchToken(rpc, associatedTokenAddress, {
+  commitment: "confirmed",
+});
+
+// 受け取り手のトークンアカウント情報も同様に取得します。
+const recipientTokenAccount = await fetchToken(
+  rpc,
+  recipientAssociatedTokenAddress,
+  {
+    commitment: "confirmed",
+  },
+);
+
+// 取得したトークンアカウント情報からamountフィールドを参照してトークンの残高を確認しましょう。
+const senderBalance = senderTokenAccount.data.amount;
+const recipientBalance = recipientTokenAccount.data.amount;
+
+// 結果をログに出力します。
+// decimalsを9に設定していたので、1_000_000_000(10億)が1トークンに相当します。
+console.log("\n=== Final Balances ===");
+console.log("Sender balance:", Number(senderBalance) / 1_000_000_000, "tokens");
+console.log(
+  "Recipient balance:",
+  Number(recipientBalance) / 1_000_000_000,
+  "tokens",
+);

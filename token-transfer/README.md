@@ -18,21 +18,34 @@ surfpool start
 npx tsx new-token.ts
 ```
 
-4. 無事にトークンが発行できましたね。
+4. 元々送信者のアカウントに発行された1トークンが無事に0.5トークン受け取り手のアドレスに転送できていますね。
 
 ```
-Mint Address: GpeQDAkgTjQvqLmuV6n6ZTRiMR78Aioq3TwPQgxdHDj
+Mint Address: AmyVqS4BRsZxqYXdakU8MaSzF81USfYyNswnH8vRTr49
 
-Transaction Signature: 43nCBydhfpTUaKFoXXQwCNBh4Be3wDRQkD5YgrTvi1Tw7rcqBYxMAiW9WX1UTpJXRAhSLqFABe8MRXt5kAMPhCaT
+Transaction Signature: cJkz96C8PPhZm35mn9L7SxR9Zx1uqi3zWmueX9hpCzoSJ6se6Gz6jth45ATrdibmXnQ7XngsEgr8M9PDzLhgHJx
 
-Token Account Address: 3zf2uXB3uuGsitubwoekEVBJqAUgYde26Rx3cRVC5ttS
+Token Account Address: 4YeJ8GgepiWEancpV6meQvLJNpYJiXx5QAWiwVNmR2T1
 
-Transaction Signature: 3kUGzwybGcXEeAdqfy6431F3GqF5dh8CerDkiZQqSuZP5svnWTvgmXGpa277DML8q9tTmCfqqPiMPsKGZNjV76md
+Transaction Signature: 9cXiicrPstJjRUS9YvPWKs8iok4iSBNv7TdWtnZoBHbesJBxwcDzFZWRmL9WviJvWHKK7yP1yUjeJW6y5cCb3Df
 
-Associated Token Account Address: 6HZArbemfyfMftK6Wqg6u3zZzTfvtiUoNhD6tPXnkA4x
+Associated Token Account Address: 7j2U6U87LAAWV4Q4hwPDWjBBj58hy2uQUZSWmD4qPd2h
 
-Transaction Signature: 63h7hEML3JaTzMKaEDjJQ7yQDS1ntJgVsnywVdSnhDzwKKKiY6jrPpBhupveugvYCWVhiHxkaZfhezobwusmPLq5
+Transaction Signature: AdM48Dx88v7p12J2L9Uvh7w8SVhDuaJ8ysPCEWtvTX2ziAMes7c8LSbKNdQwjsQNj57MxGni8Kvtf8vkhCpjv4C
+
 Successfully minted 1.0 tokens
 
-Transaction Signature: 5Wh6XKk2kFqzipNr4TiNzCM3oP2RVakbiZC1BPkAKYtB5r1Faj3jDDfqhvNRR814aQjc84bVmwKnGqnx6cjkJdvc
+Transaction Signature: 2QJcwQSi7ZFH1rmW2QFxRBuaBpWQQJReJFaJ478RbHeZYy619wPLWpkgN1RZw83pYujCWTMYQz8HHJx1c7PBxnWp
+
+Recipient Associated Token Account Address: 3Pk2ZJUvc4HZwHfuJbteNwu3fsprrj4qyz9uuiRkfT1g
+
+Transaction Signature: 26zSjreg61RGk1J2TwF3u2azf4iC6aeTYowEBvvzqF1eBqu4pJRm5WVLDq5iiDYnNNFt6Sw4T9RsifzsBRdcaxim
+
+Transaction Signature: 4FJzsHgLZmEB2QwHNJ3CgNGEQ7CRYGDr235KVfD7LsxNEuqa5rmbwhcpTsjFJ7FTA7DwpzPDFSpT8QELvfKNpx2o
+
+Successfully transferred 0.5 tokens
+
+=== Final Balances ===
+Sender balance: 0.5 tokens
+Recipient balance: 0.5 tokens
 ```
