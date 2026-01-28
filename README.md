@@ -59,3 +59,9 @@ Mint Authorityは任意のアドレスを設定して新たなSPLトークンを
 # トークンアカウントクローズ
 
 [./token-account-close/README.md](./token-account-close/README.md)に台本作成。
+
+# 最後
+
+以上でトークンの作成に関するハンズオンは終了します。
+次はトークンエクステンションに関するハンズオンになります。
+お疲れ様でした
