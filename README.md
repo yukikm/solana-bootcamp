@@ -51,3 +51,11 @@ Mint Authorityは任意のアドレスを設定して新たなSPLトークンを
 # トークン解凍
 
 [./token-thaw/README.md](./token-thaw/README.md)に台本作成。
+
+# トークンバーン
+
+[./token-burn/README.md](./token-burn/README.md)に台本作成。
+
+# トークンアカウントクローズ
+
+[./token-account-close/README.md](./token-account-close/README.md)に台本作成。
