@@ -43,3 +43,11 @@ Mint Authorityは任意のアドレスを設定して新たなSPLトークンを
 # トークン転送
 
 [./token-transfer/README.md](./token-transfer/README.md)に台本作成。
+
+# トークンフリーズ
+
+[./token-freeze/README.md](./token-freeze/README.md)に台本作成。
+
+# トークン解凍
+
+[./token-thaw/README.md](./token-thaw/README.md)に台本作成。

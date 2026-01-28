@@ -20,7 +20,7 @@ surfpool start
 npx tsx new-token.ts
 ```
 
-4. フリーズできましたね。
+4. フリーズできましたね。これで最初に作成したアソシエイティドトークンアカウント、今0.5トークンあるアカウントがフリーズされました。
 
 ```
 Mint Address: CnVYuSRjhBWSvLsxH9EnWVLGUP22Pa64kyrZi4yowqpw
