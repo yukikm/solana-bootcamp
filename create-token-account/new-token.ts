@@ -24,8 +24,8 @@ import {
   getMintSize,
   // getTokenSizeはトークンアカウント生成時に必要なバイト数を返す関数です。
   getTokenSize,
-  TOKEN_PROGRAM_ADDRESS,
-} from "@solana-program/token";
+  TOKEN_2022_PROGRAM_ADDRESS,
+} from "@solana-program/token-2022";
 
 const rpc = createSolanaRpc("http://localhost:8899");
 const rpcSubscriptions = createSolanaRpcSubscriptions("ws://localhost:8900");
@@ -49,7 +49,7 @@ const createAccountInstruction = getCreateAccountInstruction({
   newAccount: mint,
   lamports: rent,
   space,
-  programAddress: TOKEN_PROGRAM_ADDRESS,
+  programAddress: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
 const initializeMintInstruction = getInitializeMintInstruction({
@@ -107,7 +107,7 @@ const createTokenAccountInstruction = getCreateAccountInstruction({
   newAccount: tokenAccount,
   lamports: tokenAccountRent,
   space: tokenAccountSpace,
-  programAddress: TOKEN_PROGRAM_ADDRESS,
+  programAddress: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
 // トークンアカウントのデータを初期化する命令を作ります。

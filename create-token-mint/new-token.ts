@@ -40,9 +40,9 @@ import {
   getInitializeMintInstruction,
   // アカウントを作る時にはアカウントに必要なデータ量も指定するので、getMintSizeは Mintアカウント生成時に必要なバイト数を返す関数です。
   getMintSize,
-  // TOKEN_PROGRAM_ADDRESSは Token Program のアドレスです。
-  TOKEN_PROGRAM_ADDRESS,
-} from "@solana-program/token";
+  // TOKEN_2022_PROGRAM_ADDRESSは Token 2022 Program のアドレスです。
+  TOKEN_2022_PROGRAM_ADDRESS,
+} from "@solana-program/token-2022";
 
 // RPC接続クライアントを作成します。今回はローカルバリデータに接続します。
 const rpc = createSolanaRpc("http://localhost:8899");
@@ -77,8 +77,8 @@ const createAccountInstruction = getCreateAccountInstruction({
   lamports: rent,
   // spaceはアカウントに割り当てるデータ量です。先ほど取得したミントアカウントサイズを指定します。
   space,
-  // programAddressはアカウントを管理するプログラムのアドレスです。インポートしたトークンプログラムを指定して所有権を渡します。
-  programAddress: TOKEN_PROGRAM_ADDRESS,
+  // programAddressはアカウントを管理するプログラムのアドレスです。インポートしたトークン2022プログラムを指定して所有権を渡します。
+  programAddress: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
 // トークンミントアカウントを作成後に初期化する命令です。

@@ -16,10 +16,10 @@ mkdir new-token
 npm init -y
 ```
 
-3. 必要なパッケージをインストールしましょう。@solana/kitはNodeやWeb、React Nativeなどの環境でSolanaアプリを構築するためのSDKです。JavaScriptでSolanaとやり取りするために利用します。@solana-program/system はSolana上で新しいアカウントを作るときに利用します。今回はトークンミントアカウントです。@solana-program/tokenはSPLトークンを作る時に利用するパッケージです。
+3. 必要なパッケージをインストールしましょう。@solana/kitはNodeやWeb、React Nativeなどの環境でSolanaアプリを構築するためのSDKです。JavaScriptでSolanaとやり取りするために利用します。@solana-program/system はSolana上で新しいアカウントを作るときに利用します。今回はトークンミントアカウントです。@solana-program/token-2022はトークンを作る時に利用するライブラリです。以前は@solana-program/tokenといったライブラリを使ってSPLトークンを作ってトークンを作っていました。このライブラリではトークンの送受信などシンプルな機能のトークンを作ることができるのですが、KYCやプライバシーへの配慮などトークンに求められることが増えてきたことで、トークンに拡張機能を組み込めるToken2022というトークンに拡張機能を組み込める機能が実装されました。
 
 ```
-npm i @solana/kit @solana-program/system @solana-program/token
+npm i @solana/kit @solana-program/system @solana-program/token-2022
 ```
 
 4. 実装するファイルを作成します。

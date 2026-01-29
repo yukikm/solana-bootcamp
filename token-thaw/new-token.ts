@@ -22,7 +22,7 @@ import {
   getInitializeMintInstruction,
   getMintSize,
   getTokenSize,
-  TOKEN_PROGRAM_ADDRESS,
+  TOKEN_2022_PROGRAM_ADDRESS,
   findAssociatedTokenPda,
   getMintToInstruction,
   getTransferInstruction,
@@ -30,7 +30,7 @@ import {
   getFreezeAccountInstruction,
   // フリーズされたトークンアカウントを解除するための命令をインポートします
   getThawAccountInstruction,
-} from "@solana-program/token";
+} from "@solana-program/token-2022";
 
 const rpc = createSolanaRpc("http://localhost:8899");
 const rpcSubscriptions = createSolanaRpcSubscriptions("ws://localhost:8900");
@@ -54,7 +54,7 @@ const createAccountInstruction = getCreateAccountInstruction({
   newAccount: mint,
   lamports: rent,
   space,
-  programAddress: TOKEN_PROGRAM_ADDRESS,
+  programAddress: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
 const initializeMintInstruction = getInitializeMintInstruction({
@@ -108,7 +108,7 @@ const createTokenAccountInstruction = getCreateAccountInstruction({
   newAccount: tokenAccount,
   lamports: tokenAccountRent,
   space: tokenAccountSpace,
-  programAddress: TOKEN_PROGRAM_ADDRESS,
+  programAddress: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
 const initializeTokenAccountInstruction = getInitializeAccount2Instruction({
@@ -153,7 +153,7 @@ console.log("\nTransaction Signature:", tokenAccountTransactionSignature);
 const [associatedTokenAddress] = await findAssociatedTokenPda({
   mint: mint.address,
   owner: feePayer.address,
-  tokenProgram: TOKEN_PROGRAM_ADDRESS,
+  tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
 console.log(
@@ -234,7 +234,7 @@ const recipient = await generateKeyPairSigner();
 const [recipientAssociatedTokenAddress] = await findAssociatedTokenPda({
   mint: mint.address,
   owner: recipient.address,
-  tokenProgram: TOKEN_PROGRAM_ADDRESS,
+  tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
 console.log(
