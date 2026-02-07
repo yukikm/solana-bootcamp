@@ -230,7 +230,7 @@ console.log("\nTransaction Signature:", mintTransactionSignature);
 const recipient = await generateKeyPairSigner();
 
 // 受け取り手のAssociated Token Accountを導出します。
-const [recipientAssociatedTokenAddress] = await findAssociatedTokenPda({
+const [recipientAtaAddress] = await findAssociatedTokenPda({
   // トークンミントアドレス、受け取りてのウォレットアドレス、トークンプログラムアドレスを指定してPDAを導出します。
   mint: mint.address,
   owner: recipient.address,
@@ -239,7 +239,7 @@ const [recipientAssociatedTokenAddress] = await findAssociatedTokenPda({
 
 console.log(
   "\nRecipient Associated Token Account Address:",
-  recipientAssociatedTokenAddress.toString(),
+  recipientAtaAddress.toString(),
 );
 
 // 受け取り手のAssociated Token Accountを作成する命令を生成します。
@@ -334,7 +334,7 @@ await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
   { commitment: "confirmed" },
 );
 
-// トランザクション署名を取得します。
+// トランザクションシグネチャを取得します。
 const transferTransactionSignature = getSignatureFromTransaction(
   signedTransferTxWithLifetime,
 );

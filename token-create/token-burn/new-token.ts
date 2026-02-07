@@ -29,7 +29,7 @@ import {
   fetchToken,
   getFreezeAccountInstruction,
   getThawAccountInstruction,
-  // トークンをバーンするための命令関数をインポートします
+  // トークンをバーンするための命令を作る関数です。
   getBurnCheckedInstruction,
 } from "@solana-program/token-2022";
 

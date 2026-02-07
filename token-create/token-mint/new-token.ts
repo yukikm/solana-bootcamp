@@ -24,7 +24,7 @@ import {
   getTokenSize,
   TOKEN_2022_PROGRAM_ADDRESS,
   findAssociatedTokenPda,
-  // getMintToInstructionはトークンを発行してトークンアカウントに発行したトークンを送る命令を生成する関数です。
+  // getMintToInstructionはトークンを発行してトークンアカウントにトークンを送る命令を生成する関数です。
   getMintToInstruction,
   // fetchTokenはトークンアカウントの情報を取得する関数です。
   fetchToken,
@@ -203,7 +203,7 @@ const mintToInstruction = getMintToInstruction({
   // トークン発行権限を持つアドレス
   mintAuthority: feePayer.address,
   // 発行するトークンの量を設定します。今回は1.00トークンを発行します。
-  // トークンミントアカウントを作成したときにdecimalsを9に設定したので、1トークンは1,000,000,000(10億)として定義します。
+  // トークンミントアカウントを作成したときに小数点以下の桁数、decimalsを9に設定したので、1トークンは1,000,000,000(10億)として定義します。
   amount: 1_000_000_000n,
 });
 

@@ -1,22 +1,23 @@
-// まずは必要なパッケージを@solana/kitからインポートしていきます。
+// まずは必要なモジュールを@solana/kitからインポートしていきます。
 import {
   // airdropFactoryはテスト用のSOLを取得するために使用します。
   airdropFactory,
-  // appendTransactionMessageInstructionsはトランザクションの中で何をするのか、命令を追加する関数です。
+  // appendTransactionMessageInstructionsはトランザクションの中で何をするのかといった命令を追加する関数です。
   appendTransactionMessageInstructions,
   // createSolanaRpcは Solana RPC クライアントを作成する関数で指定したRPCエンドポイントに接続します。
   createSolanaRpc,
   // createSolanaRpcSubscriptionsはSolanaノードとWebSocket接続を確立し、リアルタイムでのデータの送受信を可能にします。
   createSolanaRpcSubscriptions,
-  // createTransactionMessageはトランザクションを送信するために必要な基本構造を定義する関数です。この関数を使って必要な命令も含めてトランザクションの構造を作ります。
+  // createTransactionMessageはSolanaではトランザクションを送信するために必要な情報を事前にトランザクションメッセージとして定義する必要がありまして、そのトランザクションメッセージを作る関数です。
+  // トランザクションメッセージの中にトランザクションの手数料支払い者、命令、トランザクションの有効期限などの情報を含みます。
   createTransactionMessage,
   // generateKeyPairSignerは 新しい公開鍵と秘密鍵ペアを作る関数です。
   generateKeyPairSigner,
   // getSignatureFromTransactionは 署名済みトランザクションからTransaction Signatureを取得する関数です。
   getSignatureFromTransaction,
-  // lamportsはSOLの最小単位であるlamportを適切に扱うための関数です。今回はテスト用のSOLを取得する時に取得したい量をlamports単位で指定するために使用します。
+  // lamportsはSOLの最小単位であるlamportを適切に扱うための関数です。
   lamports,
-  // pipeはトランザクションメッセージを作成する時に利用します。複数の命令を含む複雑なトランザクションメッセージを作る時により読みやすいコードを書くことができます。
+  // pipeはトランザクションメッセージを作成する時に利用します。複数の命令を含む複雑なトランザクションメッセージを作る時にpipe関数を使うことでより読みやすいコードを書くことができます。
   pipe,
   // sendAndConfirmTransactionFactoryは実際にトランザクションを送信する関数です。
   sendAndConfirmTransactionFactory,
@@ -28,13 +29,13 @@ import {
   signTransactionMessageWithSigners,
 } from "@solana/kit";
 
-// @solana-program/systemからも必要なパッケージをインポートします。
+// @solana-program/systemからも必要なモジュールをインポートします。
 import {
   // getCreateAccountInstructionは新しいアカウントを作る関数です。
   getCreateAccountInstruction,
 } from "@solana-program/system";
 
-// @solana-program/token-2022からも必要なパッケージをインポートします。
+// @solana-program/token-2022からも必要なモジュールをインポートします。
 import {
   // getInitializeMintInstructionはトークンMintアカウントを作る時にアカウントの初期化をする命令を生成するために利用します。
   getInitializeMintInstruction,
@@ -44,11 +45,12 @@ import {
   TOKEN_2022_PROGRAM_ADDRESS,
 } from "@solana-program/token-2022";
 
-// 必要なパッケージは全てインポートできました。
+// 必要なモジュールは全てインポートできました。
 // ここから実際にトークンミントアカウントを新しく作成していきます。
 
 // まずRPC接続クライアントを作成します。今回はローカルバリデータに接続します。
 const rpc = createSolanaRpc("http://localhost:8899");
+// ローカルバリデータとのWebSocket接続用のRPCサブスクリプションクライアントも作成します。
 const rpcSubscriptions = createSolanaRpcSubscriptions("ws://localhost:8900");
 
 // トークンミントアカウント作成時の手数料を支払うアドレスのキーペアを生成します。
@@ -58,10 +60,11 @@ const feePayer = await generateKeyPairSigner();
 await airdropFactory({ rpc, rpcSubscriptions })({
   // 手数料支払い者のアドレス
   recipientAddress: feePayer.address,
-  // エアドロップするSOLの量を指定します。指定方法は9桁のlamports単位で指定します。今回は1SOL分のlamportsを指定します。
+  // エアドロップするSOLの量を指定します。指定方法は9桁のlamports単位で指定します。今回は1SOL分のlamportsをlamports関数で指定します。
   // lamportsはBigIntで扱う必要があるため、1_000_000_000nとnを付けて指定します。
   lamports: lamports(1_000_000_000n),
-  // 最後にcommitmentフィールドを指定して、今回は"confirmed"でエアドロップトランザクションが確実に実行されたことを確認します。
+  // 最後にcommitmentフィールドを指定して、今回はトランザクションが"confirmed"ステータスになり、
+  // エアドロップトランザクションが確実に実行されたことを確認します。
   commitment: "confirmed",
 });
 
@@ -71,14 +74,14 @@ const mint = await generateKeyPairSigner();
 // デフォルトのミントアカウントサイズ（バイト単位）を取得します。
 const space = BigInt(getMintSize());
 
-// ミントアカウントを作成する時にレントフィーの支払いが免除されるために必要な最小金額を取得します。
+// データサイズを元にミントアカウントを作成する時にレントフィーの支払いが免除されるために必要な最小金額を取得します。
 const rent = await rpc.getMinimumBalanceForRentExemption(space).send();
 
 // ここからトークンミントアカウントを新しく作成する命令を作っていきます。
 const createAccountInstruction = getCreateAccountInstruction({
   // payerはアカウント作成時の手数料支払い者を指定します。
   payer: feePayer,
-  // newAccountは新しく作成するアカウントです。今回は先ほどキーペアを作ったミントアドレスを指定します。
+  // newAccountは新しく作成するアカウントです。今回は先ほど作ったミントアドレスキーペアを指定します。
   newAccount: mint,
   // lamportsはアカウントに送るSOLの量です。先ほど取得したレントフィー免除に必要な最小額を指定します。
   lamports: rent,
@@ -132,7 +135,7 @@ const signedTransactionWithLifetime =
     };
   };
 
-// トランザクションを送信して、実行が完了したかをcommitmentの指定で確認します。
+// トランザクションを送信して、実行が完了したかを確認します。トランザクションがconfirmedステータスになるまで待機します。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
   signedTransactionWithLifetime,
   { commitment: "confirmed" },

@@ -17,7 +17,7 @@ import {
 import { getCreateAccountInstruction } from "@solana-program/system";
 
 import {
-  // getCreateAssociatedTokenInstructionAsyncはAssociated Token Accountを作成する命令を生成する非同期関数です。
+  // getCreateAssociatedTokenInstructionAsyncはAssociated Token Accountを作成する命令を作る非同期関数です。
   getCreateAssociatedTokenInstructionAsync,
   getInitializeAccount2Instruction,
   getInitializeMintInstruction,
@@ -191,7 +191,7 @@ const ataSignedTransaction = await signTransactionMessageWithSigners(
 );
 
 // このままではトランザクション送信関数を利用するときに型定義のエラーが出てしまいます。
-// 署名したトランザクションメッセージにlifetimeConstraintプロパティを追加していきます。
+// 署名したトランザクションメッセージにlifetimeConstraintプロパティの型を追加していきます。
 const signedAtaTxWithLifetime =
   ataSignedTransaction as typeof ataSignedTransaction & {
     lifetimeConstraint: {

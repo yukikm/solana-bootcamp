@@ -18,7 +18,7 @@ surfpool start
 npx tsx new-token.ts
 ```
 
-4. 元々送信者のアカウントに発行された1トークンが無事に0.5トークン受け取り手のアドレスに転送できていますね。
+4. 元々送信者のアカウントに発行された1トークンが無事に0.5トークン受け取り手のアドレスに送金できていますね。
 
 ```
 Mint Address: AmyVqS4BRsZxqYXdakU8MaSzF81USfYyNswnH8vRTr49

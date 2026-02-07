@@ -16,7 +16,7 @@ import {
 
 import { getCreateAccountInstruction } from "@solana-program/system";
 
-// @solana-program/token-2022で新たにトークンアカウント用のパッケージをインポートします。
+// @solana-program/token-2022で新たにトークンアカウント用のモジュールをインポートします。
 import {
   // getInitializeAccount2Instructionはトークンアカウントを初期化する命令を生成する関数です。
   getInitializeAccount2Instruction,
@@ -103,9 +103,9 @@ const tokenAccountRent = await rpc
 
 // 次にトークンアカウントを新しく作成する命令を作ります。項目はミントアカウントの時と同じですね。
 const createTokenAccountInstruction = getCreateAccountInstruction({
-  // payerはトークンアカウント作成時の手数料を支払うアドレスです。今回は手数料支払い者を指定します。
+  // payerはトークンアカウント作成時の手数料支払い者です。今回は先ほど作ったfeePayerを指定します。
   payer: feePayer,
-  // newAccountは新しく作成するトークンアカウントのアドレスです。先ほど生成したキーペアを指定します。
+  // newAccountは新しく作成するアカウントで、先ほど生成したトークンアカウントキーペアを指定します。
   newAccount: tokenAccount,
   // lamportsはトークンアカウントのレントフィー免除に必要な金額です。
   lamports: tokenAccountRent,

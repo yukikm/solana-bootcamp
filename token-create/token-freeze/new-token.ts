@@ -27,7 +27,7 @@ import {
   getMintToInstruction,
   getTransferInstruction,
   fetchToken,
-  // トークンアカウントをフリーズするための命令をインポートします
+  // トークンアカウントをフリーズするための命令を作る関数です。
   getFreezeAccountInstruction,
 } from "@solana-program/token-2022";
 
@@ -366,7 +366,7 @@ const freezeTxMessage = pipe(
 // トランザクションメッセージに署名します
 const signedFreezeTx = await signTransactionMessageWithSigners(freezeTxMessage);
 
-// このままではトランザクション送信のコードでエラーが出るのでライフタイム制約の型定義を追加します
+// このままではトランザクション送信のコードで型定義のエラーが出るのでライフタイム制約の型定義を追加します
 const signedFreezeTxWithLifetime = signedFreezeTx as typeof signedFreezeTx & {
   lifetimeConstraint: {
     lastValidBlockHeight: bigint;
