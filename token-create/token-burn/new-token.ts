@@ -29,7 +29,7 @@ import {
   fetchToken,
   getFreezeAccountInstruction,
   getThawAccountInstruction,
-  // トークンをバーンするための命令をインポートします
+  // トークンをバーンするための命令関数をインポートします
   getBurnCheckedInstruction,
 } from "@solana-program/token-2022";
 
@@ -409,8 +409,9 @@ const thawTransactionSignature = getSignatureFromTransaction(signedThawTx);
 console.log("\nSuccessfully thawed the frozen token account");
 console.log("\nTransaction Signature:", thawTransactionSignature);
 
-// バーン前のトークン残高を確認するためにトークンアカウントを取得します
-// 最初1トークン発行してその後に0.5トークン送金したので、現在は0.5トークン存在しています。
+// バーン前のトークン残高を確認したいと思います。
+// 先ほどトークン転送のときにも使ったfetchToken関数を使ってトークンアカウントの情報を取得します。
+// 現在は0.5トークン存在しています。
 const tokenAccountBefore = await fetchToken(rpc, associatedTokenAddress);
 console.log(
   "\nToken balance before burn:",
@@ -418,22 +419,22 @@ console.log(
   "tokens",
 );
 
-// バーントランザクション用の新しいブロックハッシュを取得します
-const { value: burnBlockhash } = await rpc.getLatestBlockhash().send();
-
 // トークンをバーンする命令を作成します
 const burnInstruction = getBurnCheckedInstruction({
   // バーンする対象のトークンアカウントのアドレスを指定します
   account: associatedTokenAddress,
   // 次にバーンする対象のトークンmintアドレスを指定します
   mint: mint.address,
-  // バーン権限を持つアドレスを指定します。ここでは最初に指定したトークンアカウントのオーナーであるfeePayerを指定します
+  // バーン権限を持つアドレスを指定します。ここでは指定したAssociated Token AccountのオーナーであるfeePayerを指定します
   authority: feePayer.address,
   // バーンするトークンの量を指定します。ここでは0.5トークンをバーンします
   amount: 500_000_000n,
   // decimalsはトークンの小数点以下の桁数を指定します。最初にmintアカウントを作成したときと同じ値を指定する必要があります
   decimals: 9,
 });
+
+// バーントランザクション用の新しいブロックハッシュを取得します
+const { value: burnBlockhash } = await rpc.getLatestBlockhash().send();
 
 // バーン用のトランザクションメッセージを作成します
 const burnTxMessage = pipe(
@@ -446,21 +447,22 @@ const burnTxMessage = pipe(
 // トランザクションメッセージに署名します
 const signedBurnTx = await signTransactionMessageWithSigners(burnTxMessage);
 
-const signedBurnTxWithBlockhashLifetime =
-  signedBurnTx as typeof signedBurnTx & {
-    lifetimeConstraint: {
-      lastValidBlockHeight: bigint;
-    };
+const signedBurnTxWithLifetime = signedBurnTx as typeof signedBurnTx & {
+  lifetimeConstraint: {
+    lastValidBlockHeight: bigint;
   };
+};
 
 // トランザクションを送信してconfirmedステータスを待ちます
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedBurnTxWithBlockhashLifetime,
+  signedBurnTxWithLifetime,
   { commitment: "confirmed" },
 );
 
 // トランザクション署名を取得していきます
-const burnTransactionSignature = getSignatureFromTransaction(signedBurnTx);
+const burnTransactionSignature = getSignatureFromTransaction(
+  signedBurnTxWithLifetime,
+);
 
 // バーン後のトークン残高を確認するためにトークンアカウントを取得します
 const tokenAccountAfter = await fetchToken(rpc, associatedTokenAddress);

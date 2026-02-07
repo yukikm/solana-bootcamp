@@ -28,7 +28,7 @@ import {
   getTransferInstruction,
   fetchToken,
   getFreezeAccountInstruction,
-  // フリーズされたトークンアカウントを解除するための命令をインポートします
+  // フリーズされたトークンアカウントを解除するための命令を作る関数をインポートします
   getThawAccountInstruction,
 } from "@solana-program/token-2022";
 
@@ -374,9 +374,6 @@ const freezeTransactionSignature = getSignatureFromTransaction(signedFreezeTx);
 console.log("\nSuccessfully frozen the token account");
 console.log("\nTransaction Signature:", freezeTransactionSignature);
 
-// フリーズ解除トランザクション用の新しいブロックハッシュを取得します
-const { value: thawBlockhash } = await rpc.getLatestBlockhash().send();
-
 // フリーズされたトークンアカウントを解除する命令を作成します
 // 対象のフリーズされたアドレス、ミントアカウントアドレス、ミントアカウント初期化時に設定したフリーズ権限を持つオーナーアドレスを指定します
 const thawInstruction = getThawAccountInstruction({
@@ -384,6 +381,9 @@ const thawInstruction = getThawAccountInstruction({
   mint: mint.address,
   owner: feePayer.address,
 });
+
+// フリーズ解除トランザクション用の新しいブロックハッシュを取得します
+const { value: thawBlockhash } = await rpc.getLatestBlockhash().send();
 
 // フリーズ解除用のトランザクションメッセージを作成します
 // これまでと同じように、手数料支払いアドレス、ブロックハッシュ、フリーズ解除命令を設定します
@@ -397,22 +397,23 @@ const thawTxMessage = pipe(
 // トランザクションメッセージに署名します
 const signedThawTx = await signTransactionMessageWithSigners(thawTxMessage);
 
-// ブロックハッシュの有効期限情報を持つ型にキャストします
-const signedThawTxWithBlockhashLifetime =
-  signedThawTx as typeof signedThawTx & {
-    lifetimeConstraint: {
-      lastValidBlockHeight: bigint;
-    };
+// このままではトランザクション送信のコードで型定義のエラーが出るのでライフタイム制約の型定義を追加します
+const signedThawTxWithLifetime = signedThawTx as typeof signedThawTx & {
+  lifetimeConstraint: {
+    lastValidBlockHeight: bigint;
   };
+};
 
 // トランザクションを送信してconfirmedステータスを待ちます
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedThawTxWithBlockhashLifetime,
+  signedThawTxWithLifetime,
   { commitment: "confirmed" },
 );
 
 // トランザクション署名を取得します
-const thawTransactionSignature = getSignatureFromTransaction(signedThawTx);
+const thawTransactionSignature = getSignatureFromTransaction(
+  signedThawTxWithLifetime,
+);
 
 // ログも確認しましょう。
 console.log("\nSuccessfully thawed the frozen token account");

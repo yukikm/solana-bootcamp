@@ -25,9 +25,8 @@ import {
   TOKEN_2022_PROGRAM_ADDRESS,
   findAssociatedTokenPda,
   getMintToInstruction,
-  // getTransferInstructionはトークンを別のアカウントに送金する命令を生成する関数です。
+  // getTransferInstructionはトークンを別のアドレスに送金する命令を生成する関数です。
   getTransferInstruction,
-  // fetchTokenはトークンアカウントの情報を取得する関数です。実際に送金されたか確認するために使用します。
   fetchToken,
 } from "@solana-program/token-2022";
 
@@ -227,7 +226,7 @@ const mintTransactionSignature = getSignatureFromTransaction(signedMintTx);
 console.log("\nSuccessfully minted 1.0 tokens");
 console.log("\nTransaction Signature:", mintTransactionSignature);
 
-// トークン転送を確認するためにトークンを受け取るための新しいアカウントを作成していきます。
+// トークン転送を確認するためにトークンを受け取るための新しいアドレスを作ります。
 const recipient = await generateKeyPairSigner();
 
 // 受け取り手のAssociated Token Accountを導出します。
@@ -268,7 +267,7 @@ const recipientAtaSignedTransaction = await signTransactionMessageWithSigners(
   recipientAtaTransactionMessage,
 );
 
-const signedRecipientAssociatedTokenAccountTxWithBlockhashLifetime =
+const signedRecipientAtaTxWithLifetime =
   recipientAtaSignedTransaction as typeof recipientAtaSignedTransaction & {
     lifetimeConstraint: {
       lastValidBlockHeight: bigint;
@@ -277,13 +276,13 @@ const signedRecipientAssociatedTokenAccountTxWithBlockhashLifetime =
 
 // 受け取り手のAssociated Token Accountを作成するトランザクションを送信し、confirmedステータスになるまで待機します。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedRecipientAssociatedTokenAccountTxWithBlockhashLifetime,
+  signedRecipientAtaTxWithLifetime,
   { commitment: "confirmed" },
 );
 
 // ログにトランザクションシグネチャを出力します。
 const recipientAtaTransactionSignature = getSignatureFromTransaction(
-  recipientAtaSignedTransaction,
+  signedRecipientAtaTxWithLifetime,
 );
 console.log("\nTransaction Signature:", recipientAtaTransactionSignature);
 
@@ -291,8 +290,6 @@ console.log("\nTransaction Signature:", recipientAtaTransactionSignature);
 // 受け取り手のAssociated Token Accountも作成できてますね。
 
 // それでは、いよいよトークンの送金を行います。
-// 送金トランザクション用の新しいブロックハッシュを取得します。
-const { value: transferBlockhash } = await rpc.getLatestBlockhash().send();
 
 // getTransferInstruction関数を使ってトークン送金用の命令を生成します。
 const transferInstruction = getTransferInstruction({
@@ -303,8 +300,13 @@ const transferInstruction = getTransferInstruction({
   // authorityには送金元アカウントのオーナーアドレスを指定します。
   authority: feePayer.address,
   // 先ほど1.0トークンを発行したので、半分の0.5トークンを送金します。
+  // decimalsを9に設定していたので、0.5トークンは500,000,000(5億)として指定します。
+  // 今回はbigintで指定します。
   amount: 500_000_000n,
 });
+
+// 送金トランザクション有効期限に設定する新しいブロックハッシュを取得します。
+const { value: transferBlockhash } = await rpc.getLatestBlockhash().send();
 
 // トークン送金用のトランザクションメッセージを作成します。
 // feePayer、ブロックハッシュの設定はこれまで同様で、今回は直前で作ったtransferInstruction命令を追加します。
@@ -319,7 +321,7 @@ const transferTxMessage = pipe(
 const signedTransferTx =
   await signTransactionMessageWithSigners(transferTxMessage);
 
-const signedTransferTxWithBlockhashLifetime =
+const signedTransferTxWithLifetime =
   signedTransferTx as typeof signedTransferTx & {
     lifetimeConstraint: {
       lastValidBlockHeight: bigint;
@@ -328,13 +330,14 @@ const signedTransferTxWithBlockhashLifetime =
 
 // 実際に送金トランザクションを送信し、confirmedステータスになるまで待機します。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedTransferTxWithBlockhashLifetime,
+  signedTransferTxWithLifetime,
   { commitment: "confirmed" },
 );
 
 // トランザクション署名を取得します。
-const transferTransactionSignature =
-  getSignatureFromTransaction(signedTransferTx);
+const transferTransactionSignature = getSignatureFromTransaction(
+  signedTransferTxWithLifetime,
+);
 
 // 送金が成功したことをログに出力します。
 console.log("\nTransaction Signature:", transferTransactionSignature);
@@ -342,7 +345,7 @@ console.log("\nSuccessfully transferred 0.5 tokens");
 
 // トークン送金が正しく行われたか確認するために、送金元と送金先のAssociated Token Accountの残高を取得します。
 // fetchToken関数を使ってAssociated Token Accountの情報を取得します。
-// 第一引数にはRPCクライアント、第二引数にトークンアカウントアドレスを指定します。
+// RPCクライアント、とトークンアカウントアドレスを指定します。
 // 送金された後の状態を見たいので、confirmedステータスのデータを取得します。
 const senderTokenAccount = await fetchToken(rpc, associatedTokenAddress, {
   commitment: "confirmed",
@@ -357,12 +360,14 @@ const recipientTokenAccount = await fetchToken(
   },
 );
 
-// 取得したトークンアカウント情報からamountフィールドを参照してトークンの残高を確認しましょう。
+// 取得したトークンアカウント情報からトークンの残高のみを取り出します。
 const senderBalance = senderTokenAccount.data.amount;
 const recipientBalance = recipientTokenAccount.data.amount;
 
 // 結果をログに出力します。
+// 元のまま表示するとbigint型なので、Number型に変換してから表示します。
 // decimalsを9に設定していたので、1_000_000_000(10億)が1トークンに相当します。
+// なので、1_000_000_000で割って実際のトークン残高を表示します。
 console.log("\n=== Final Balances ===");
 console.log("Sender balance:", Number(senderBalance) / 1_000_000_000, "tokens");
 console.log(

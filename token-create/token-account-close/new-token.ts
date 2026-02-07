@@ -30,7 +30,7 @@ import {
   getFreezeAccountInstruction,
   getThawAccountInstruction,
   getBurnCheckedInstruction,
-  // トークンアカウントをクローズするための命令をインポートします
+  // トークンアカウントをクローズするための命令を作る関数をインポートします
   getCloseAccountInstruction,
 } from "@solana-program/token-2022";
 
@@ -460,21 +460,21 @@ console.log(
 console.log("\nSuccessfully burned 0.5 tokens");
 console.log("\nTransaction Signature:", burnTransactionSignature);
 
-// レントフィーの払い戻し先アカウントを作成します。こちらのアカウントにクローズしたトークンアカウントのレントフィーを送ります。
+// アカウントのレントフィーの払い戻し先を作成します。こちらのキーペアアドレスにクローズしたトークンアカウントのレントフィーを送ります。
 const destination = await generateKeyPairSigner();
-
-// クローズトランザクション用の新しいブロックハッシュを取得します
-const { value: closeBlockhash } = await rpc.getLatestBlockhash().send();
 
 // トークンアカウントをクローズする命令を作成します
 const closeAccountInstruction = getCloseAccountInstruction({
   // accountではクローズするトークンアカウントのアドレスを指定します
   account: associatedTokenAddress,
-  // レントフィーの払い戻し先アカウントを指定します
+  // レントフィーの払い戻し先アドレスを指定します
   destination: destination.address,
-  // オーナーにはアソシエイティドトークンアカウントの所有者を指定します。今回はfeePayerが所有者なのでfeePayerを指定します
+  // オーナーにはトークンアカウントの所有者を指定します。今回はfeePayerが所有者なのでfeePayerを指定します
   owner: feePayer,
 });
+
+// クローズトランザクション用の新しいブロックハッシュを取得します
+const { value: closeBlockhash } = await rpc.getLatestBlockhash().send();
 
 // クローズ用のトランザクションメッセージを作成します。
 const closeTxMessage = pipe(
@@ -487,21 +487,22 @@ const closeTxMessage = pipe(
 // トランザクションメッセージに署名します
 const signedCloseTx = await signTransactionMessageWithSigners(closeTxMessage);
 
-const signedCloseTxWithBlockhashLifetime =
-  signedCloseTx as typeof signedCloseTx & {
-    lifetimeConstraint: {
-      lastValidBlockHeight: bigint;
-    };
+const signedCloseTxWithLifetime = signedCloseTx as typeof signedCloseTx & {
+  lifetimeConstraint: {
+    lastValidBlockHeight: bigint;
   };
+};
 
 // トランザクションを送信してconfirmedステータスを待ちます
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedCloseTxWithBlockhashLifetime,
+  signedCloseTxWithLifetime,
   { commitment: "confirmed" },
 );
 
 // トランザクション署名を取得します
-const closeTransactionSignature = getSignatureFromTransaction(signedCloseTx);
+const closeTransactionSignature = getSignatureFromTransaction(
+  signedCloseTxWithLifetime,
+);
 
 // ログも出力しましょう
 console.log("\nSuccessfully closed the token account");
