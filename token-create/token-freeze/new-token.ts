@@ -342,8 +342,6 @@ console.log(
 );
 
 // ここからトークンアカウントをフリーズするコードを追加します
-// まずはフリーズトランザクション用の新しいブロックハッシュを取得します
-const { value: freezeBlockhash } = await rpc.getLatestBlockhash().send();
 
 // 最初に作成したアソシエイテッドトークンアカウントをフリーズする命令を作成します
 // 対象のアカウント、ミントアドレス、フリーズ権限を持つオーナーアドレスを指定します
@@ -352,6 +350,9 @@ const freezeInstruction = getFreezeAccountInstruction({
   mint: mint.address,
   owner: feePayer.address,
 });
+
+// フリーズトランザクション用の新しいブロックハッシュを取得します
+const { value: freezeBlockhash } = await rpc.getLatestBlockhash().send();
 
 // フリーズ用のトランザクションメッセージを作成します。
 // これまで同様、手数料支払い者、ブロックハッシュ、最後にフリーズ命令を設定します
@@ -365,22 +366,23 @@ const freezeTxMessage = pipe(
 // トランザクションメッセージに署名します
 const signedFreezeTx = await signTransactionMessageWithSigners(freezeTxMessage);
 
-// ブロックハッシュの有効期限情報を型に追加します
-const signedFreezeTxWithBlockhashLifetime =
-  signedFreezeTx as typeof signedFreezeTx & {
-    lifetimeConstraint: {
-      lastValidBlockHeight: bigint;
-    };
+// このままではトランザクション送信のコードでエラーが出るのでライフタイム制約の型定義を追加します
+const signedFreezeTxWithLifetime = signedFreezeTx as typeof signedFreezeTx & {
+  lifetimeConstraint: {
+    lastValidBlockHeight: bigint;
   };
+};
 
 // トランザクションを送信してconfirmedステータスを待ちます
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedFreezeTxWithBlockhashLifetime,
+  signedFreezeTxWithLifetime,
   { commitment: "confirmed" },
 );
 
 // 最後にトランザクション署名を取得してコンソールに表示してみましょう
-const freezeTransactionSignature = getSignatureFromTransaction(signedFreezeTx);
+const freezeTransactionSignature = getSignatureFromTransaction(
+  signedFreezeTxWithLifetime,
+);
 
 console.log("\nSuccessfully frozen the token account");
 console.log("\nTransaction Signature:", freezeTransactionSignature);

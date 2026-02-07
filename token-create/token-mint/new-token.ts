@@ -24,8 +24,10 @@ import {
   getTokenSize,
   TOKEN_2022_PROGRAM_ADDRESS,
   findAssociatedTokenPda,
-  // getMintToInstructionはトークンを発行してトークンアカウントに送る命令を生成する関数です。
+  // getMintToInstructionはトークンを発行してトークンアカウントに発行したトークンを送る命令を生成する関数です。
   getMintToInstruction,
+  // fetchTokenはトークンアカウントの情報を取得する関数です。
+  fetchToken,
 } from "@solana-program/token-2022";
 
 const rpc = createSolanaRpc("http://localhost:8899");
@@ -201,7 +203,7 @@ const mintToInstruction = getMintToInstruction({
   // トークン発行権限を持つアドレス
   mintAuthority: feePayer.address,
   // 発行するトークンの量を設定します。今回は1.00トークンを発行します。
-  // トークンミントアカウントを作成するときにdecimalsを9に設定したので、1トークンは1,000,000,000(10億)の最小単位に相当します。
+  // トークンミントアカウントを作成したときにdecimalsを9に設定したので、1トークンは1,000,000,000(10億)として定義します。
   amount: 1_000_000_000n,
 });
 
@@ -217,23 +219,37 @@ const mintTxMessage = pipe(
 // トランザクションメッセージに署名します。
 const signedMintTx = await signTransactionMessageWithSigners(mintTxMessage);
 
-// ブロックハッシュの有効期限情報を付与します。
-const signedMintTxWithBlockhashLifetime =
-  signedMintTx as typeof signedMintTx & {
-    lifetimeConstraint: {
-      lastValidBlockHeight: bigint;
-    };
+// このままでは型定義のエラーが出てしまうので、lifetimeConstraintプロパティを追加していきます。
+const signedMintTxWithLifetime = signedMintTx as typeof signedMintTx & {
+  lifetimeConstraint: {
+    lastValidBlockHeight: bigint;
   };
+};
 
 // トランザクションを送信し、confirmedステータスになるまで待ちます。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedMintTxWithBlockhashLifetime,
+  signedMintTxWithLifetime,
   { commitment: "confirmed" },
 );
 
-// トランザクション署名を取得します。
-const mintTransactionSignature = getSignatureFromTransaction(signedMintTx);
+// トランザクションシグネチャを取得します。
+const mintTransactionSignature = getSignatureFromTransaction(
+  signedMintTxWithLifetime,
+);
 
 // トークン発行が成功したことを確認するログを表示します。
 console.log("\nSuccessfully minted 1.0 tokens");
 console.log("\nTransaction Signature:", mintTransactionSignature);
+
+// 実際にトークンアカウントの情報を取得して、トークンが発行されていることも確認してみましょう。
+const ataData = await fetchToken(rpc, associatedTokenAddress, {
+  commitment: "confirmed",
+});
+
+// 取得したトークンアカウントの情報の中から残高を取得します。
+const ataBalance = ataData.data.amount;
+
+// ログに表示して確認します。
+// 表示するときにataBalanceはbigint型なので、Number型に変換してから表示します。
+// トークンの小数点以下の桁数、decimalsを9桁に設定したので、1_000_000_000(10億)で割って表示します。
+console.log("ATA Balance:", Number(ataBalance) / 1_000_000_000, "tokens");

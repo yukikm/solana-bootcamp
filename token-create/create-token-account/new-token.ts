@@ -16,13 +16,13 @@ import {
 
 import { getCreateAccountInstruction } from "@solana-program/system";
 
-// @solana-program/tokenで新たにトークンアカウント用のパッケージをインポートします。
+// @solana-program/token-2022で新たにトークンアカウント用のパッケージをインポートします。
 import {
   // getInitializeAccount2Instructionはトークンアカウントを初期化する命令を生成する関数です。
   getInitializeAccount2Instruction,
   getInitializeMintInstruction,
   getMintSize,
-  // getTokenSizeはトークンアカウント生成時に必要なバイト数を返す関数です。
+  // getTokenSizeはトークンアカウント生成に必要なデータ量を返す関数です。
   getTokenSize,
   TOKEN_2022_PROGRAM_ADDRESS,
 } from "@solana-program/token-2022";
@@ -93,20 +93,25 @@ console.log("\nTransaction Signature:", transactionSignature);
 // まずはトークンアカウントのアドレスとして使用するキーペアを生成します。
 const tokenAccount = await generateKeyPairSigner();
 
-// ミントアカウントの時と同様にトークンアカウント作成に必要なサイズを取得します。
+// ミントアカウントの時と同様にトークンアカウント作成に必要なデータサイズを取得します。
 const tokenAccountSpace = BigInt(getTokenSize());
 
-// 必要なサイズを元にレントフィー免除に必要な最小額を取得します。
+// 必要なサイズを元にトークンアカウントのレントフィー免除に必要な金額を取得します。
 const tokenAccountRent = await rpc
   .getMinimumBalanceForRentExemption(tokenAccountSpace)
   .send();
 
 // 次にトークンアカウントを新しく作成する命令を作ります。項目はミントアカウントの時と同じですね。
 const createTokenAccountInstruction = getCreateAccountInstruction({
+  // payerはトークンアカウント作成時の手数料を支払うアドレスです。今回は手数料支払い者を指定します。
   payer: feePayer,
+  // newAccountは新しく作成するトークンアカウントのアドレスです。先ほど生成したキーペアを指定します。
   newAccount: tokenAccount,
+  // lamportsはトークンアカウントのレントフィー免除に必要な金額です。
   lamports: tokenAccountRent,
+  // spaceはトークンアカウントのデータサイズです。
   space: tokenAccountSpace,
+  // programAddressはトークン2022プログラムを指定していきます。
   programAddress: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
@@ -116,7 +121,7 @@ const initializeTokenAccountInstruction = getInitializeAccount2Instruction({
   account: tokenAccount.address,
   // ここではどのトークンミントアカウントに紐づけるかを指定します。ミントアカウントのアドレスを指定しましょう。
   mint: mint.address,
-  // ownerはこのトークンアカウントを管理するアドレスです。ミントアカウントで発行権限を持つアドレスと同じ手数料支払い者のアドレスを指定します。
+  // ownerはこのトークンアカウントを管理するアドレスです。今回は手数料支払い者のアドレスを指定します。
   owner: feePayer.address,
 });
 
@@ -140,24 +145,28 @@ const tokenAccountMessage = pipe(
 const signedTokenAccountTx =
   await signTransactionMessageWithSigners(tokenAccountMessage);
 
-// そのままではブロックハッシュベースのトランザクションとして認識されないため、
-// lifetimeConstraintプロパティを追加してブロックハッシュベースのトランザクションとして扱います。
-const signedTokenAccountTxWithBlockhashLifetime =
+// このままではトランザクションの有効期限がブロックハッシュベースとして認識されず、
+// トランザクション送信関数を利用するときに型定義のエラーが出てしまいます。
+// 署名したトランザクションメッセージにlifetimeConstraintプロパティを追加して
+// 有効期限がブロックハッシュベースのトランザクションとして扱えるようにします。
+const signedTokenAccountTxWithLifetime =
   signedTokenAccountTx as typeof signedTokenAccountTx & {
     lifetimeConstraint: {
       lastValidBlockHeight: bigint;
     };
   };
 
-// トランザクションを送信し、confirmedステータスになるのを待ちます。
+// トランザクションを送信し、トランザクションがconfirmedステータスになるまで待ちます。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedTokenAccountTxWithBlockhashLifetime,
+  signedTokenAccountTxWithLifetime,
   { commitment: "confirmed" },
 );
 
 // トランザクション署名を取得します。
-const transactionSignature2 = getSignatureFromTransaction(signedTokenAccountTx);
+const transactionSignature2 = getSignatureFromTransaction(
+  signedTokenAccountTxWithLifetime,
+);
 
 // 最後に作成したトークンアカウントアドレスとトランザクション署名をコンソールに表示します。
 console.log("\nToken Account Address:", tokenAccount.address);
-console.log("\nTransaction Signature:", transactionSignature2);
+console.log("Transaction Signature:", transactionSignature2);

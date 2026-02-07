@@ -24,7 +24,7 @@ import {
   getMintSize,
   getTokenSize,
   TOKEN_2022_PROGRAM_ADDRESS,
-  // findAssociatedTokenPdaはミントアドレスとウォレットアドレス、今回はトークン発行者権限を持つアドレスからAssociated Token Accountのアドレスを導出する関数です。
+  // findAssociatedTokenPdaはトークンミントアドレスとウォレットアドレスから、Associated Token Accountのアドレスを導出する関数です。
   findAssociatedTokenPda,
 } from "@solana-program/token-2022";
 
@@ -153,15 +153,15 @@ const [associatedTokenAddress] = await findAssociatedTokenPda({
   tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
 });
 
-// 実際に動作させてみましょう。このように簡単に導出することができます。
+// ログに表示してみましょう。このままだとAddress型なのでtoStringメソッドで文字列に変換して表示します。
 console.log(
   "\nAssociated Token Account Address:",
   associatedTokenAddress.toString(),
 );
 
-// ここからは実際にAssociated Token Accountを作成してみます。
-// 2つ目のトランザクション用に新しいブロックハッシュを取得します。
-const { value: latestBlockhash2 } = await rpc.getLatestBlockhash().send();
+// 実際に動作させてみましょう。このように簡単に導出することができます。
+
+// ここからは今導出したアドレスを使ってAssociated Token Accountを作成してみます。
 
 // Associated Token Accountを作成する命令を生成します。getCreateAssociatedTokenInstructionAsyncは非同期関数なのでawaitで呼び出します。
 // トークン発行者権限を持つfeePayerのアドレスと最初に作成したMintアカウントからAssociated Token Accountを作成します。
@@ -171,6 +171,9 @@ const createAtaInstruction = await getCreateAssociatedTokenInstructionAsync({
   mint: mint.address,
   owner: feePayer.address,
 });
+
+// 新しいブロックハッシュを取得します。
+const { value: latestBlockhash2 } = await rpc.getLatestBlockhash().send();
 
 // トランザクションメッセージを作成します。
 // 手数料支払い者とブロックハッシュを設定するところは同じです。
@@ -187,8 +190,9 @@ const ataSignedTransaction = await signTransactionMessageWithSigners(
   ataTransactionMessage,
 );
 
-// ブロックハッシュの有効期限情報を付与します。
-const signedAssociatedTokenAccountTxWithBlockhashLifetime =
+// このままではトランザクション送信関数を利用するときに型定義のエラーが出てしまいます。
+// 署名したトランザクションメッセージにlifetimeConstraintプロパティを追加していきます。
+const signedAtaTxWithLifetime =
   ataSignedTransaction as typeof ataSignedTransaction & {
     lifetimeConstraint: {
       lastValidBlockHeight: bigint;
@@ -197,11 +201,12 @@ const signedAssociatedTokenAccountTxWithBlockhashLifetime =
 
 // トランザクションを送信し、confirmedステータスになるまで待ちます。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
-  signedAssociatedTokenAccountTxWithBlockhashLifetime,
+  signedAtaTxWithLifetime,
   { commitment: "confirmed" },
 );
 
-// トランザクション署名を取得します。
-const ataTransactionSignature =
-  getSignatureFromTransaction(ataSignedTransaction);
+// トランザクションシグネチャを取得して動作確認していきます。
+const ataTransactionSignature = getSignatureFromTransaction(
+  signedAtaTxWithLifetime,
+);
 console.log("\nTransaction Signature:", ataTransactionSignature);
