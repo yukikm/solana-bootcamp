@@ -23,7 +23,7 @@ import {
   sendAndConfirmTransactionFactory,
   // setTransactionMessageFeePayerSignerはトランザクションメッセージを作る時にトランザクション手数料支払い者を設定する関数です。
   setTransactionMessageFeePayerSigner,
-  // setTransactionMessageLifetimeUsingBlockhashは 最新のブロックハッシュを使ってトランザクションの有効期限を設定します。
+  // setTransactionMessageLifetimeUsingBlockhashは 最新のブロックハッシュを使ってトランザクションの有効期限をトランザクションメッセージの中に設定します。
   setTransactionMessageLifetimeUsingBlockhash,
   // signTransactionMessageWithSigners: トランザクションメッセージに署名する関数です。
   signTransactionMessageWithSigners,
