@@ -252,12 +252,12 @@ const createRecipientAtaInstruction =
 
 // 受け取りてのAssociated Token Accountを作成するトランザクションメッセージを構築します。
 // 以前実施したAssociated Token Accountの作成と同様の手順です。
-const { value: latestBlockhash3 } = await rpc.getLatestBlockhash().send();
+const { value: latestBlockhash4 } = await rpc.getLatestBlockhash().send();
 
 const recipientAtaTransactionMessage = pipe(
   createTransactionMessage({ version: 0 }),
   (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
-  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash3, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash4, tx),
   (tx) =>
     appendTransactionMessageInstructions([createRecipientAtaInstruction], tx),
 );
