@@ -2,7 +2,7 @@
 import {
   // airdropFactoryはテスト用のSOLを取得するために使用します。
   airdropFactory,
-  // appendTransactionMessageInstructionsはトランザクションの中で何をするのかといった命令を追加する関数です。
+  // appendTransactionMessageInstructionsはトランザクションの中で何をするのかといった命令をトランザクションメッセージに追加する関数です。トランザクションメッセージについては後ほど触れます。
   appendTransactionMessageInstructions,
   // createSolanaRpcは Solana RPC クライアントを作成する関数で指定したRPCエンドポイントに接続します。
   createSolanaRpc,
