@@ -63,8 +63,8 @@ await airdropFactory({ rpc, rpcSubscriptions })({
   // エアドロップするSOLの量を指定します。SOLは小数点以下が9桁扱えるので、指定方法は9桁のlamports単位で指定します。今回は1SOL分のlamportsをlamports関数で指定します。
   // lamportsはBigIntで扱う必要があるため、1_000_000_000nとnを付けて指定します。
   lamports: lamports(1_000_000_000n),
-  // 最後にcommitmentプロパティを指定します。今回はトランザクションが"confirmed"ステータスになり、
-  // エアドロップトランザクションが確実に実行されるまで待って次の処理に進みます。
+  // 最後にcommitmentプロパティを指定します。Solanaのトランザクションが最終的に確定するまでには幾つかのフェーズがあります。commitmentレベルと呼ばれていて、トランザクションがネットワークの中でどの程度承認されているかレベル定義をしています。
+  // finalizedというステータスが最も確実なのですが、そこまで待たなくても今回はconfirmedステータスという過半数以上の承認がされるレベルまで待って次の処理に進みます。
   commitment: "confirmed",
 });
 
