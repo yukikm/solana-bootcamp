@@ -137,7 +137,7 @@ const signedTransactionWithLifetime =
     };
   };
 
-// トランザクションを送信して、実行が完了したかを確認します。トランザクションがconfirmedステータスになるまで待機します。
+// トランザクションを送信します。署名済みトランザクションメッセージとcommitmentレベルを定義します。トランザクションがconfirmedステータスになるまで待機します。
 await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
   signedTransactionWithLifetime,
   { commitment: "confirmed" },
