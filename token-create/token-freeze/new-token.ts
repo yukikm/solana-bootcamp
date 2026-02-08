@@ -379,10 +379,55 @@ await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
   { commitment: "confirmed" },
 );
 
-// 最後にトランザクション署名を取得してコンソールに表示してみましょう
+// トランザクション署名を取得してコンソールに表示してみましょう
 const freezeTransactionSignature = getSignatureFromTransaction(
   signedFreezeTxWithLifetime,
 );
 
 console.log("\nSuccessfully frozen the token account");
 console.log("\nTransaction Signature:", freezeTransactionSignature);
+
+// トークンアカウントがフリーズされているか確認するために、再度送金トランザクションを試みます
+// 送金命令を作成して
+const freezeTransferInstruction = getTransferInstruction({
+  source: associatedTokenAddress,
+  destination: recipientAssociatedTokenAddress,
+  authority: feePayer.address,
+  amount: 500_000_000n,
+});
+
+// 最新のブロッックハッシュを取得して
+const { value: postFreezeBlockhash } = await rpc.getLatestBlockhash().send();
+
+// 送金トランザクションメッセージを作成します
+const postFreezeTransferTxMessage = pipe(
+  createTransactionMessage({ version: 0 }),
+  (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(postFreezeBlockhash, tx),
+  (tx) => appendTransactionMessageInstructions([transferInstruction], tx),
+);
+
+// そして送金トランザクションメッセージに署名します
+const signedPostFreezeTransferTx = await signTransactionMessageWithSigners(
+  postFreezeTransferTxMessage,
+);
+
+// 型定義のエラーを避けるためにライフタイム制約の型定義を追加します
+const signedPostFreezeTransferTxWithLifetime =
+  signedPostFreezeTransferTx as typeof signedPostFreezeTransferTx & {
+    lifetimeConstraint: {
+      lastValidBlockHeight: bigint;
+    };
+  };
+
+// 最後に送金トランザクションを送信してみます。
+await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(
+  signedPostFreezeTransferTxWithLifetime,
+  { commitment: "confirmed" },
+);
+
+// 動作確認してみましょう。
+// エラーが出て失敗のエラーメッセージが表示されましたね。
+// 理由を見てみるとアカウントがフリーズされているため送金できないという内容が含まれてますね。
+
+// このままではエラーが出るので、動作確認用に追加した送金トランザクションのコードはコメントアウトしておきます。
