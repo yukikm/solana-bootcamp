@@ -109,8 +109,10 @@ const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
 // トランザクションに送るメッセージを作成します。
 // pipe関数を使ってトランザクションメッセージを作成していきます。
+// pipe内の各関数は前の関数の結果を入力として受け取ってトランザクションメッセージを段階的に修正しながら作っていきます。
 const transactionMessage = pipe(
   // createTransactionMessage関数を使ってトランザクションメッセージの作成を始めます。
+  // トランザクションには現在legacyとversion 0の二種類のトランザクションのバージョンが存在します。legacyが古いタイプのものなので基本的に0を指定します。
   createTransactionMessage({ version: 0 }),
   // 手数料支払い者を設定します。ここで設定したアカウントがトランザクションに署名します。
   (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
