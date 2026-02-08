@@ -207,12 +207,15 @@ const mintToInstruction = getMintToInstruction({
   amount: 1_000_000_000n,
 });
 
+// トランザクション有効期限で設定する、最新のブロックハッシュを取得します。
+const { value: latestBlockhash3 } = await rpc.getLatestBlockhash().send();
+
 // トークン発行用のトランザクションメッセージを作成します。
 // 手数料支払い者とブロックハッシュを設定するところは同じで、今回命令には先ほど生成したトークン発行用の命令を含めます。
 const mintTxMessage = pipe(
   createTransactionMessage({ version: 0 }),
   (tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
-  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash3, tx),
   (tx) => appendTransactionMessageInstructions([mintToInstruction], tx),
 );
 
