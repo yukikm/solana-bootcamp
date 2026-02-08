@@ -60,7 +60,7 @@ const feePayer = await generateKeyPairSigner();
 await airdropFactory({ rpc, rpcSubscriptions })({
   // 手数料支払い者のアドレス
   recipientAddress: feePayer.address,
-  // エアドロップするSOLの量を指定します。指定方法は9桁のlamports単位で指定します。今回は1SOL分のlamportsをlamports関数で指定します。
+  // エアドロップするSOLの量を指定します。SOLは小数点以下が9桁扱えるので、指定方法は9桁のlamports単位で指定します。今回は1SOL分のlamportsをlamports関数で指定します。
   // lamportsはBigIntで扱う必要があるため、1_000_000_000nとnを付けて指定します。
   lamports: lamports(1_000_000_000n),
   // 最後にcommitmentフィールドを指定して、今回はトランザクションが"confirmed"ステータスになり、
