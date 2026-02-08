@@ -21,7 +21,7 @@ surfpool start
 npx tsx new-token.ts
 ```
 
-4. 無事にトークンアカウントがクローズされましたね。
+4. 無事にトークンアカウントがクローズされましたね。アカウントのレントフィーの払い戻し先のSOLの残高はクローズ後に増えてますね。無事に払い戻しもされたことが確認できました。
 
 ```
 Mint Address: GV9nTaLAdTMd1ubyjR8dpcYCp3d3xScbyeGeGj48HLb9

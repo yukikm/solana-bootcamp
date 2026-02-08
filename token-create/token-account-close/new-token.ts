@@ -463,6 +463,18 @@ console.log("\nTransaction Signature:", burnTransactionSignature);
 // アカウントのレントフィーの払い戻し先を作成します。こちらのキーペアアドレスにクローズしたトークンアカウントのレントフィーを送ります。
 const destination = await generateKeyPairSigner();
 
+// クローズ前の払い戻し先アカウントのSOL残高を取得して表示してみます。
+// rpcクライアントのgetBalanceメソッドを使用して取得できます。
+// キーペアのアドレスを指定して、commitmentには"confirmed"を指定します。
+const { value: destinationBalanceBefore } = await rpc
+  .getBalance(destination.address, { commitment: "confirmed" })
+  .send();
+
+// ログにも出力してみましょう。
+// BigInt型で取得できるので、Number型に変換した後、1_000_000_000(10億)で割ってSOL単位に変換しています。
+// SOLも小数点以下の桁数は9桁まで表現できるので、1SOL単位で割って表示します。
+console.log("SOL balance:", Number(destinationBalanceBefore) / 1_000_000_000);
+
 // トークンアカウントをクローズする命令を作成します
 const closeAccountInstruction = getCloseAccountInstruction({
   // accountではクローズするトークンアカウントのアドレスを指定します
@@ -507,3 +519,12 @@ const closeTransactionSignature = getSignatureFromTransaction(
 // ログも出力しましょう
 console.log("\nSuccessfully closed the token account");
 console.log("\nTransaction Signature:", closeTransactionSignature);
+
+// クローズ後の払い戻し先アカウントのSOL残高を取得して表示してみます。
+// 先ほどと同様にrpcクライアントのgetBalanceメソッドを使用して取得します。
+const { value: destinationBalanceAfter } = await rpc
+  .getBalance(destination.address, { commitment: "confirmed" })
+  .send();
+
+// ログにも出力してみましょう。
+console.log("SOL balance:", Number(destinationBalanceAfter) / 1_000_000_000);
