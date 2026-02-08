@@ -63,8 +63,8 @@ await airdropFactory({ rpc, rpcSubscriptions })({
   // エアドロップするSOLの量を指定します。SOLは小数点以下が9桁扱えるので、指定方法は9桁のlamports単位で指定します。今回は1SOL分のlamportsをlamports関数で指定します。
   // lamportsはBigIntで扱う必要があるため、1_000_000_000nとnを付けて指定します。
   lamports: lamports(1_000_000_000n),
-  // 最後にcommitmentフィールドを指定して、今回はトランザクションが"confirmed"ステータスになり、
-  // エアドロップトランザクションが確実に実行されたことを確認します。
+  // 最後にcommitmentプロパティを指定します。今回はトランザクションが"confirmed"ステータスになり、
+  // エアドロップトランザクションが確実に実行されるまで待って次の処理に進みます。
   commitment: "confirmed",
 });
 
