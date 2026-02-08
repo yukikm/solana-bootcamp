@@ -50,11 +50,11 @@ yuki@Windows:/mnt/c/Windows/system32$
 13. 検索バーからも「Ubuntu」と検索することでUbuntuターミナルを開くことができます。
 
 # WSL Visual Studio Codeでの確認
-1. VS Codeを利用している場合はWSLの拡張機能をインストールすると一緒に利用ができます。VSCodeを開いてみましょう。
+1. Visual Studio Codeを利用している場合はWSLの拡張機能をインストールすると一緒に利用ができます。Visual Studio Codeを開いてみましょう。
 2. 拡張機能から「WSL」と入力してみましょう。
 3. Microsoft公式の拡張機能をインストールします。
-4. VS Codeの左のメニューの「Remote Explorer」をクリックすると、さきほどインストールしたUbuntuが表示されます。
-5. Ubuntuをクリックすると新しいVSCodeエディタが立ち上がります。左下に「WSL:Ubuntu」と書かれていますね。これでVSCodeでもUbuntu環境が利用できます。
+4. Visual Studio Codeの左のメニューの「Remote Explorer」をクリックすると、さきほどインストールしたUbuntuが表示されます。
+5. Ubuntuをクリックすると新しいVisual Studio Codeエディタが立ち上がります。左下に「WSL:Ubuntu」と書かれていますね。これでVisual Studio CodeでもUbuntu環境が利用できます。
 6. terminalを開いてみましょう。先ほどセットアップしたユーザでUbuntu環境を使うことができます。
 
 
