@@ -10,7 +10,7 @@ import {
   createSolanaRpcSubscriptions,
   // createTransactionMessageはトランザクションメッセージを作る関数です。
   // Solanaではトランザクションを送信するために必要な情報を事前にトランザクションメッセージとして定義する必要があります。
-  // トランザクションメッセージの中にトランザクションの手数料支払い者、命令、トランザクションの有効期限などの情報を含みます。
+  // トランザクションメッセージの中にトランザクションの手数料支払い者、トランザクションの有効期限、命令、などの情報を含みます。
   createTransactionMessage,
   // generateKeyPairSignerは 新しい公開鍵と秘密鍵ペアを作る関数です。
   generateKeyPairSigner,
