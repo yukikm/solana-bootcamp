@@ -106,7 +106,7 @@ const initializeMintInstruction = getInitializeMintInstruction({
 // 今作ったトークンミントアカウントを作成する命令と初期化する命令を配列にまとめます。
 const instructions = [createAccountInstruction, initializeMintInstruction];
 
-// トランザクションの有効期限を設定するために、最新のブロックハッシュを取得してこちらを有効期限として使います。
+// ここからトランザクションメッセージを作っていくのですが、その中でトランザクションの有効期限を設定するために、最新のブロックハッシュを取得してこちらを有効期限として使います。
 const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
 // トランザクションに送るメッセージを作成します。
