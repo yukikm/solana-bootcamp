@@ -75,7 +75,8 @@ const mint = await generateKeyPairSigner();
 // デフォルトのミントアカウントサイズ（バイト単位）を取得します。
 const space = BigInt(getMintSize());
 
-// データサイズを元に,ミントアカウントを作成する時にレントフィーの支払いが免除されるために必要な最小金額を取得します。
+// データサイズを元に,ミントアカウントを作成する時に必要なレントフィーの支払いが
+// 免除されるために必要な最小金額を取得します。
 const rent = await rpc.getMinimumBalanceForRentExemption(space).send();
 
 // ここからトークンミントアカウントを新しく作成する命令を作っていきます。
