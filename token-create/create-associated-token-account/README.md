@@ -22,7 +22,7 @@ surfpool start
 npx tsx new-token.ts
 ```
 
-4. 無事にAssociated Token Account のトランザクションシグネチャが表示されましたね。
+4. 無事にAssociated Token Account のトランザクションシグネチャが表示されましたね。これでAssociatedTokenAccountが作成できました。
 
 ```
 Mint Address: 9pRbYUTWvmf4UjWAhrhXnRHMAMMrWV6UUcaUFz5aaoSE
