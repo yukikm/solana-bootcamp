@@ -109,7 +109,6 @@ const instructions = [createAccountInstruction, initializeMintInstruction];
 // ここからトランザクションメッセージを作っていくのですが、その中でトランザクションの有効期限を設定するために、最新のブロックハッシュを取得してこちらを有効期限として使います。
 const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-// トランザクションに送るメッセージを作成します。
 // pipe関数を使ってトランザクションメッセージを作成していきます。
 // pipe内の各関数は前の関数の結果を入力として受け取ってトランザクションメッセージを段階的に修正しながら作っていきます。
 const transactionMessage = pipe(
