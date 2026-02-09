@@ -8,7 +8,8 @@ import {
   createSolanaRpc,
   // createSolanaRpcSubscriptionsはSolanaノードとWebSocket接続を確立し、リアルタイムでのデータの送受信を可能にします。
   createSolanaRpcSubscriptions,
-  // createTransactionMessageはSolanaではトランザクションを送信するために必要な情報を事前にトランザクションメッセージとして定義する必要がありまして、そのトランザクションメッセージを作る関数です。
+  // createTransactionMessageはトランザクションメッセージを作る関数です。
+  // Solanaではトランザクションを送信するために必要な情報を事前にトランザクションメッセージとして定義する必要があります。
   // トランザクションメッセージの中にトランザクションの手数料支払い者、命令、トランザクションの有効期限などの情報を含みます。
   createTransactionMessage,
   // generateKeyPairSignerは 新しい公開鍵と秘密鍵ペアを作る関数です。
