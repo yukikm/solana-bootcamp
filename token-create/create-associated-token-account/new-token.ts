@@ -146,7 +146,7 @@ console.log("\nToken Account Address:", tokenAccount.address);
 console.log("\nTransaction Signature:", tokenAccountTransactionSignature);
 
 // まずfindAssociatedTokenPdaを使用してAssociated Token Accountアドレスを導出してみましょう。
-// 今回は最初に作成したミントアドレスとトークン発行者権限を持つfeePayerのアドレスを使用して導出してみます。
+// 今回は最初に作成したミントアドレスとAssociatedoOkenAccountの所有者、今回はfeePayerのアドレスを使用して導出してみます。
 const [associatedTokenAddress] = await findAssociatedTokenPda({
   mint: mint.address,
   owner: feePayer.address,
