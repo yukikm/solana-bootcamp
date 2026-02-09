@@ -229,18 +229,18 @@ console.log("\nTransaction Signature:", mintTransactionSignature);
 // トークン転送を確認するためにトークンを受け取るための新しいアドレスを作ります。
 const recipient = await generateKeyPairSigner();
 
-// 受け取り手のAssociated Token Accountを導出します。
-const [recipientAtaAddress] = await findAssociatedTokenPda({
-  // トークンミントアドレス、受け取りてのウォレットアドレス、トークンプログラムアドレスを指定してPDAを導出します。
-  mint: mint.address,
-  owner: recipient.address,
-  tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
-});
+// (作成だけすればいいと思う)受け取り手のAssociated Token Accountを導出します。
+// const [recipientAtaAddress] = await findAssociatedTokenPda({
+//   // トークンミントアドレス、受け取りてのウォレットアドレス、トークンプログラムアドレスを指定してPDAを導出します。
+//   mint: mint.address,
+//   owner: recipient.address,
+//   tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
+// });
 
-console.log(
-  "\nRecipient Associated Token Account Address:",
-  recipientAtaAddress.toString(),
-);
+// console.log(
+//   "\nRecipient Associated Token Account Address:",
+//   recipientAtaAddress.toString(),
+// );
 
 // 受け取り手のAssociated Token Accountを作成する命令を生成します。
 const createRecipientAtaInstruction =
