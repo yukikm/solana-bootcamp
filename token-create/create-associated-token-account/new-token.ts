@@ -161,7 +161,7 @@ console.log(
 
 // 実際に動作させてみましょう。このように簡単に導出することができます。
 
-// ここからは今導出したアドレスを使ってAssociated Token Accountを作成してみます。
+// ここからはAssociated Token Accountを実際にオンチェーン上に作成してみます。
 
 // Associated Token Accountを作成する命令を生成します。getCreateAssociatedTokenInstructionAsyncは非同期関数なのでawaitで呼び出します。
 // トークン発行者権限を持つfeePayerのアドレスと最初に作成したMintアカウントからAssociated Token Accountを作成します。
