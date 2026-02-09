@@ -375,7 +375,7 @@ console.log("\nSuccessfully frozen the token account");
 console.log("\nTransaction Signature:", freezeTransactionSignature);
 
 // フリーズされたトークンアカウントを解除する命令を作成します
-// 対象のフリーズされたアドレス、ミントアカウントアドレス、ミントアカウント初期化時に設定したフリーズ権限を持つオーナーアドレスを指定します
+// 対象のフリーズされたアドレス、ミントアカウントアドレス、ミントアカウント初期化時に設定したフリーズ権限を持つアドレスを指定します
 const thawInstruction = getThawAccountInstruction({
   account: associatedTokenAddress,
   mint: mint.address,
