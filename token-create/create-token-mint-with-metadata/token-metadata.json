@@ -1,0 +1,7 @@
+{
+    "name": "My Token",
+    "symbol": "MTK",
+    "description": "A description of the token",
+    "image": "https://raw.githubusercontent.com/yukikm/solana-bootcamp/refs/heads/main/token-create/create-token-mint-with-metadata/test.jpg",
+    "external_url": "https://example.com"
+}
